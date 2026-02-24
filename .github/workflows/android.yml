@@ -17,10 +17,11 @@ jobs:
         include:
           - target: aarch64-linux-android
             arch: arm64-v8a
-          - target: armv7-linux-androideabi
-            arch: armeabi-v7a
-          - target: x86_64-linux-android
-            arch: x86_64
+          # 如果你只需要 v8a，下面这两个可以保持注释掉的状态
+          # - target: armv7-linux-androideabi
+          #   arch: armeabi-v7a
+          # - target: x86_64-linux-android
+          #   arch: x86_64
       fail-fast: false
       
     steps:
@@ -66,14 +67,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # --- 关键修复步骤：初始化安卓工程 ---
+      - name: Initialize Android Project
+        run: pnpm tauri android init
+
       - name: Bump Version
         run: |
           VERSION="1.0.${{ github.run_number }}"
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
           
-          # Bump package.json
+          # 确保名称是大写的 SPlayer
+          sed -i -E 's/"productName": "([^"]+)"/"productName": "SPlayer"/' src-tauri/tauri.conf.json
+          # 更新版本号
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' package.json
-          # Bump tauri.conf.json
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' src-tauri/tauri.conf.json
 
       - name: Build Android APK
@@ -83,7 +89,12 @@ jobs:
 
       - name: Rename APK
         run: |
-          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          # 使用更稳健的方法查找 APK
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | grep "release" | head -n 1)
+          # 如果没找到 release 版，尝试找 debug 版
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          fi
           mv "$APK_PATH" SPlayer-${{ matrix.arch }}-v${{ env.APP_VERSION }}.apk
 
       - name: Upload Artifact
