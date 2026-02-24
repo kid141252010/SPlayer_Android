@@ -15,8 +15,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - tauri_target: aarch64             # 给 Tauri 命令用的简化名
-            rust_target: aarch64-linux-android # 给 Rust 工具链用的完整名
+          # 分开定义：tauri_target 传给命令，rust_target 传给工具链
+          - tauri_target: aarch64
+            rust_target: aarch64-linux-android
             arch: arm64-v8a
       fail-fast: false
       
@@ -35,7 +36,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          # 这里必须用完整的三元组名称
+          # 这里必须用完整名，否则 Rust 无法识别目标平台
           targets: ${{ matrix.rust_target }}
 
       - name: Rust Cache
@@ -68,13 +69,14 @@ jobs:
         run: |
           VERSION="1.0.${{ github.run_number }}"
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          # 确保产品名是大写的 SPlayer
+          # 强制修改 productName 确保应用显示为 SPlayer
           sed -i -E 's/"productName": "([^"]+)"/"productName": "SPlayer"/' src-tauri/tauri.conf.json
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' package.json
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' src-tauri/tauri.conf.json
 
       - name: Ensure Tauri Entrypoint
         run: |
+          # 动态创建入口文件，防止 Gradle 任务找不到 tauri 模块
           if [ ! -f "src-tauri/tauri" ]; then
             echo "require('@tauri-apps/cli').run()" > src-tauri/tauri
           fi
@@ -83,13 +85,14 @@ jobs:
         run: pnpm tauri android init
 
       - name: Build Android APK
-        # 这里改为使用 tauri_target (aarch64)
+        # 这里使用了简写的 tauri_target (aarch64)
         run: pnpm tauri android build --target ${{ matrix.tauri_target }} --apk
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Rename APK
         run: |
+          # 寻找编译好的 APK 并根据架构更名
           APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | grep "release" | head -n 1)
           if [ -z "$APK_PATH" ]; then
             APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
