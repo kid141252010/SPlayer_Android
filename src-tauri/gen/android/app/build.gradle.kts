@@ -35,15 +35,22 @@ android {
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
     }
 
-    // === 新增：配置签名参数 (Kotlin 语法) ===
+    // === 修改：配置签名参数 (支持从环境变量读取，且变为可选) ===
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.canRead()) {
-                // 使用 rootProject 确保相对路径绝对准确指向 src-tauri
-                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile") ?: "")
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+            val sFile = keystoreProperties.getProperty("storeFile") ?: System.getenv("ANDROID_KEYSTORE_FILE")
+            if (!sFile.isNullOrEmpty()) {
+                val file = rootProject.file(sFile)
+                if (file.exists()) {
+                    storeFile = file
+                    storePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                    keyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
+                    keyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
+                } else {
+                    println("Warning: Keystore file not found at $sFile, release build will be unsigned.")
+                }
+            } else {
+                println("Warning: No keystore file configured, release build will be unsigned.")
             }
         }
     }
@@ -59,8 +66,13 @@ android {
             }
         }
         getByName("release") {
-            // === 新增：让 release 模式应用上面的签名 ===
-            signingConfig = signingConfigs.getByName("release")
+            // === 修改：仅在签名文件存在时才应用签名 ===
+            val releaseConfig = signingConfigs.getByName("release")
+            if (releaseConfig.storeFile != null && releaseConfig.storeFile!!.exists()) {
+                signingConfig = releaseConfig
+            } else {
+                println("Note: Building unsigned APK as no keystore was found.")
+            }
             
             isMinifyEnabled = true
             proguardFiles(
