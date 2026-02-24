@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         include:
-          # 仅保留 aarch64 (v8a) 架构，以减少编译时间和资源占用
           - target: aarch64-linux-android
             arch: arm64-v8a
       fail-fast: false
@@ -63,22 +62,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Bump Version & SPlayer Rename
+      - name: Bump Version and SPlayer Rename
         run: |
           VERSION="1.0.${{ github.run_number }}"
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          
-          # 强制将产品名称改为大写的 SPlayer
           sed -i -E 's/"productName": "([^"]+)"/"productName": "SPlayer"/' src-tauri/tauri.conf.json
-          # 更新版本号
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' package.json
           sed -i -E 's/"version": "([^"]+)"/"version": "'$VERSION'"/' src-tauri/tauri.conf.json
 
       - name: Ensure Tauri Entrypoint
         run: |
-          # 修复 Gradle 找不到 tauri 模块的问题 (MODULE_NOT_FOUND)
           if [ ! -f "src-tauri/tauri" ]; then
             echo "require('@tauri-apps/cli').run()" > src-tauri/tauri
           fi
 
-      - name: Initialize Android
+      - name: Initialize Android Project
+        run: pnpm tauri android init
+
+      - name: Build Android APK
+        run: pnpm tauri android build --target ${{ matrix.target }} --apk
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Rename APK
+        run: |
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | grep "release" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          fi
+          mv "$APK_PATH" SPlayer-${{ matrix.arch }}-v${{ env.APP_VERSION }}.apk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SPlayer-Android-${{ matrix.arch }}-v${{ env.APP_VERSION }}
+          path: SPlayer-${{ matrix.arch }}-v${{ env.APP_VERSION }}.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: SPlayer-Android-*
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
