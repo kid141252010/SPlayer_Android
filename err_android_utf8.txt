@@ -1,0 +1,542 @@
+﻿node.exe :         Inf
+o Using installed NDK:
+ E:\Android_SDK\ndk\29
+.0.14206865
+所在位置 C:\Users\1412\App
+Data\Roaming\npm\pnpm.
+ps1:24 字符: 5
++     & "node$exe"  "$
+basedir/node_modules/p
+npm/bin/pnpm.cjs" $arg
+s
++     ~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (        In   
+ fo Us...k\29.0.14    
+206865:String) []    ,
+ RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+        Info Looking u
+p installed tauri pack
+ages to check mismatch
+ed versions...
+     Running beforeBui
+ldCommand `npx electro
+n-vite build`
+npm warn Unknown env c
+onfig "manage-package-
+manager-versions". Thi
+s will stop working in
+ the next major versio
+n of npm. See `npm hel
+p npmrc` for supported
+ config options.
+npm warn Unknown env c
+onfig "verify-deps-bef
+ore-run". This will st
+op working in the next
+ major version of npm.
+ See `npm help npmrc` 
+for supported config o
+ptions.
+npm warn Unknown proje
+ct config "disturl". T
+his will stop working 
+in the next major vers
+ion of npm. See `npm h
+elp npmrc` for support
+ed config options.
+npm warn Unknown proje
+ct config "electron_mi
+rror". This will stop 
+working in the next ma
+jor version of npm. Se
+e `npm help npmrc` for
+ supported config opti
+ons.
+npm warn Unknown proje
+ct config "electron_bu
+ilder_binaries_mirror"
+. This will stop worki
+ng in the next major v
+ersion of npm. See `np
+m help npmrc` for supp
+orted config options.
+npm warn Unknown proje
+ct config "shamefully-
+hoist". This will stop
+ working in the next m
+ajor version of npm. S
+ee `npm help npmrc` fo
+r supported config opt
+ions.
+[36mvite v7.3.1 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+[32m鉁?[39m 790 modules transformed.
+rendering chunks...
+[2mout/main/[22m[32mchunks/favicon-BHdx3GwV.png       [39m[1m[2m    4.18 kB[22m[1m[22m
+[2mout/main/[22m[36mworkers/audio-analysis.worker.js  [39m[1m[2m    2.69 kB[22m[1m[22m
+[2mout/main/[22m[36mindex.js                          [39m[1m[33m2,133.72 kB[39m[22m
+[32m鉁?built in 2.63s[39m
+[36mvite v7.3.1 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+[32m鉁?[39m 1 modules transformed.
+rendering chunks...
+[2mout/preload/[22m[36mindex.mjs  [39m[1m[2m1.22 kB[22m[1m[22m
+[32m鉁?built in 8ms[39m
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m鉁?[39m 3950 modules transformed.
+rendering chunks...
+[2mout/renderer/[22m[32massets/scheduler.worker-3zCVKAza.js          [39m[1m[2m    0.27 kB[22m[1m[22m
+[2mout/renderer/[22m[32mindex.html                                   [39m[1m[2m    0.96 kB[22m[1m[22m
+[2mout/renderer/[22m[32mweb/loading/index.html                       [39m[1m[2m    2.50 kB[22m[1m[22m
+[2mout/renderer/[22m[32massets/amll_lyric_bg-CJqSHUji.wasm           [39m[1m[2m  240.50 kB[22m[1m[22m
+[2mout/renderer/[22m[32massets/ferrous_opencc_wasm_bg-Cs2bcDdF.wasm  [39m[1m[2m1,151.33 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CloudMatch-D48stl5f.css               [39m[1m[2m    0.04 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/downloaded-CQSZlQ6a.css               [39m[1m[2m    0.05 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/UpdatePlaylist-47DC5RKM.css           [39m[1m[2m    0.05 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/BatchList-CmrX91Zz.css                [39m[1m[2m    0.09 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/streaming-playlist-CfkLkyRL.css       [39m[1m[2m    0.10 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/artists-QqXXFk8m.css                  [39m[1m[2m    0.13 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ABLoop-DitZ6lKh.css                   [39m[1m[2m    0.14 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/DownloadModal-2wANHjvj.css            [39m[1m[2m    0.15 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CopySongInfo-B0yYxCaM.css             [39m[1m[2m    0.16 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/AutoClose-C65yhk5W.css                [39m[1m[2m    0.16 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CreatePlaylist-BCMH3OZx.css           [39m[1m[2m    0.17 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/playlists-DYh5RS07.css                [39m[1m[2m    0.18 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/new-D4WFCZNk.css                      [39m[1m[2m    0.18 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/playlists-CEBilxyM.css                [39m[1m[2m    0.20 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ExcludeComment-F5UkfN2C.css           [39m[1m[2m    0.21 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/playlists-0Iq9L4te.css                [39m[1m[2m    0.21 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/type-D5EfGKXI.css                     [39m[1m[2m    0.22 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/PlaylistPageManager-BqQGeJoN.css      [39m[1m[2m    0.24 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SidebarHideManager-BVT8CFhq.css       [39m[1m[2m    0.24 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ListComment-Cu9oOoHL.css              [39m[1m[2m    0.24 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-E_b5FY4u.css                   [39m[1m[2m    0.31 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CustomCode-DeNDbGbw.css               [39m[1m[2m    0.32 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/LocalMusicDirectory-Dz-MWeTf.css      [39m[1m[2m    0.34 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/PlaylistAdd-BAxsgTFi.css              [39m[1m[2m    0.35 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/UpdateApp-DuHywIhS.css                [39m[1m[2m    0.38 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-CYtw3Qbm.css                   [39m[1m[2m    0.39 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SongUnlockManager-DY0MI0Ic.css        [39m[1m[2m    0.40 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/folders-CdE6Bi0u.css                  [39m[1m[2m    0.42 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/AMLLServer-7bRpuvMd.css               [39m[1m[2m    0.43 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SongInfoEditor-oOrbLqCV.css           [39m[1m[2m    0.44 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ScalingModal-ua06qdCA.css             [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CopyLyrics-CpyGMFTG.css               [39m[1m[2m    0.46 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CoverManager-DuNysmaI.css             [39m[1m[2m    0.48 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/JumpArtist-dQxVUfLY.css               [39m[1m[2m    0.51 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/UserAgreement-T9-fo9A7.css            [39m[1m[2m    0.54 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/Equalizer-lxr-vF0v.css                [39m[1m[2m    0.55 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/DailySongs-BvTqto6u.css               [39m[1m[2m    0.55 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/playlists-DZdOtr1m.css                [39m[1m[2m    0.55 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/HomePageSectionManager-B7LVP3oU.css   [39m[1m[2m    0.60 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/History-Cw0F5OsO.css                  [39m[1m[2m    0.60 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-CVn9ncJX.css                   [39m[1m[2m    0.63 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/hot-u49VEppU.css                      [39m[1m[2m    0.69 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ContextMenuManager-CDcejc28.css       [39m[1m[2m    0.71 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/FullscreenPlayerManager-vgSHO9Oz.css  [39m[1m[2m    0.74 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/toplists-69g1AwMe.css                 [39m[1m[2m    0.78 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-8QmTaT_N.css                   [39m[1m[2m    1.10 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/artists-CMnSAeTe.css                  [39m[1m[2m    1.14 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/artists-DymO4_R-.css                  [39m[1m[2m    1.19 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ExcludeLyrics-wfYCIos3.css            [39m[1m[2m    1.26 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/albums-BsO0y9Uq.css                   [39m[1m[2m    1.48 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/Cloud-D6Mt3S2b.css                    [39m[1m[2m    1.50 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/albums-BnLYjah7.css                   [39m[1m[2m    1.54 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/FontManager-DfBBFGi_.css              [39m[1m[2m    1.59 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SongDataCard-Db13SWvD.css             [39m[1m[2m    1.69 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/loading-BRrDQiAC.css                  [39m[1m[2m    1.79 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-ndXvHAqW.css                   [39m[1m[2m    1.84 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SongListCard-zCDYsL3o.css             [39m[1m[2m    1.90 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-DwNx3lea.css                   [39m[1m[2m    1.97 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/Login-IA9uhXwl.css                    [39m[1m[2m    2.09 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ThemeConfig-DmQXuMKI.css              [39m[1m[2m    2.17 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/ArtistList-DjgFrwnA.css               [39m[1m[2m    2.71 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/wiki-B-F1qi9f.css                     [39m[1m[2m    3.04 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/downloading-BiBe1cxq.css              [39m[1m[2m    3.19 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/layout-Dj3fqLzw.css                   [39m[1m[2m    3.36 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/CoverList-Bv25DlOj.css                [39m[1m[2m    4.66 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/index-Cf7DLkkm.css                    [39m[1m[2m    5.12 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/useListActions-PSay3IW_.css           [39m[1m[2m    5.42 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/index-Cw2DZQKM.css                    [39m[1m[2m    6.50 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/index-CYSGTrF-.css                    [39m[1m[2m    6.65 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/MainSetting-L5xKJkz6.css              [39m[1m[2m    8.17 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/SongList-BRYiZxTo.css                 [39m[1m[2m    8.57 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/Video-T8Iy3B4F.css                    [39m[1m[2m   34.47 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/index-BmV9ucOa.css                    [39m[1m[2m   38.92 kB[22m[1m[22m
+[2mout/renderer/[22m[35massets/stores-BVlY4id6.css                   [39m[1m[2m   74.04 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/album-BVFtt2Au.js                     [39m[1m[2m    0.09 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/lyricConfig-S_6jVaOO.js               [39m[1m[2m    0.33 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/video-ChE5sBIu.js                     [39m[1m[2m    0.36 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/song-B8Igk3iI.js                      [39m[1m[2m    0.37 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/artists-7lssh6Ew.js                   [39m[1m[2m    0.39 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/radios-CWWtYJn8.js                    [39m[1m[2m    0.40 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/albums-DTjauSll.js                    [39m[1m[2m    0.40 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/rules-Cqlcwhcd.js                     [39m[1m[2m    0.44 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/videos-C802l1AX.js                    [39m[1m[2m    0.44 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/404-8SfPegVf.js                       [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/403-9Op795C5.js                       [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/500-ClQpuQfX.js                       [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/cloud-M4JmF7hy.js                     [39m[1m[2m    0.47 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/downloaded-C0Cpsf9l.js                [39m[1m[2m    0.49 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/song-AmFCd5ID.js                      [39m[1m[2m    0.61 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlists-CS_WPoRt.js                 [39m[1m[2m    0.63 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlists-DELjz7rX.js                 [39m[1m[2m    0.69 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/albums-DBvLbRlf.js                    [39m[1m[2m    0.77 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/videos-CF3E-ZWf.js                    [39m[1m[2m    0.81 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/PlaylistPageManager-DHVuBdSO.js       [39m[1m[2m    0.96 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ChangeRate-CTk1IPqY.js                [39m[1m[2m    0.97 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/songs-ByZHlSkL.js                     [39m[1m[2m    0.98 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlists-izp7FDon.js                 [39m[1m[2m    1.02 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ScalingModal-mHBTIElf.js              [39m[1m[2m    1.04 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/artists-CiPi3ipF.js                   [39m[1m[2m    1.09 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/albums-BvfMl9rB.js                    [39m[1m[2m    1.09 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/songs-BLuQQqdI.js                     [39m[1m[2m    1.09 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/radios-DuAHXk_E.js                    [39m[1m[2m    1.10 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlists-B1cX6vx9.js                 [39m[1m[2m    1.11 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/videos-BnzeBDaM.js                    [39m[1m[2m    1.13 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SongUnlockManager-Bx5WKMW-.js         [39m[1m[2m    1.18 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/FullscreenPlayerManager-Cqcmldaz.js   [39m[1m[2m    1.22 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-BsSlou4Z.js                    [39m[1m[2m    1.38 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/HomePageSectionManager-B94ZyNIk.js    [39m[1m[2m    1.39 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SidebarHideManager-M10w0p9q.js        [39m[1m[2m    1.40 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/LocalMusicDirectory-DE3otEVb.js       [39m[1m[2m    1.44 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ContextMenuManager-4iJ3nHZS.js        [39m[1m[2m    1.47 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CoverManager-CYQLoFLR.js              [39m[1m[2m    1.54 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/type-C5JIUrJu.js                      [39m[1m[2m    1.74 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/artists-CWFLAWeZ.js                   [39m[1m[2m    1.76 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/DailySongs-BDMttQ5c.js                [39m[1m[2m    1.77 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SongDataCard-979qCCjG.js              [39m[1m[2m    1.77 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-co-8SHQ_.js                    [39m[1m[2m    1.81 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/History-8thp_Axu.js                   [39m[1m[2m    1.84 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/artists-Bw6evVYm.js                   [39m[1m[2m    1.93 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/albums-CkSKPklh.js                    [39m[1m[2m    1.98 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/artists-n6ej-6_Y.js                   [39m[1m[2m    2.00 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/AMLLServer-7EyTovc6.js                [39m[1m[2m    2.03 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/albums-BGebYtaR.js                    [39m[1m[2m    2.04 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/JumpArtist-wzXmNYRD.js                [39m[1m[2m    2.12 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SongListCard-BgfrB8Gw.js              [39m[1m[2m    2.17 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CustomCode-cey8IF5d.js                [39m[1m[2m    2.19 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ArtistList-D7CF5K31.js                [39m[1m[2m    2.25 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/new-C5Z_9hAI.js                       [39m[1m[2m    2.28 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/toplists-IoKtzaKc.js                  [39m[1m[2m    2.29 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/UpdateApp-Bj3z_etP.js                 [39m[1m[2m    2.32 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/AutoClose-CSf8aWrd.js                 [39m[1m[2m    2.38 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-Cvk_DVL8.js                    [39m[1m[2m    2.40 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/streaming-playlist-D0KE82q8.js        [39m[1m[2m    2.52 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/Equalizer-zf6rzJlc.js                 [39m[1m[2m    2.54 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/UpdatePlaylist-BsLZmG9Z.js            [39m[1m[2m    2.56 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CloudMatch-7Xa2Dwtq.js                [39m[1m[2m    2.69 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CreatePlaylist-W-H2sxEp.js            [39m[1m[2m    2.73 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CopyLyrics-CBYA9T9f.js                [39m[1m[2m    2.78 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/StreamingServerConfig-D3B2afQo.js     [39m[1m[2m    2.80 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/hot-DxU3yaj1.js                       [39m[1m[2m    2.81 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/folders-CgbtTciT.js                   [39m[1m[2m    3.11 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/downloading-9i5Inbbz.js               [39m[1m[2m    3.15 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ListComment-fNqUCLQb.js               [39m[1m[2m    3.26 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ABLoop-fBV_dcIg.js                    [39m[1m[2m    3.34 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlists-ChdKkeZ7.js                 [39m[1m[2m    3.40 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-BYAvJ5Bt.js                    [39m[1m[2m    3.41 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/Cloud-DLsKaPAV.js                     [39m[1m[2m    3.56 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/PlaylistAdd-CPaVMsQW.js               [39m[1m[2m    3.73 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/album-BEzRwxp2.js                     [39m[1m[2m    3.83 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/DownloadModal-B63dntK-.js             [39m[1m[2m    4.10 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ExcludeComment-4ZMYsFwW.js            [39m[1m[2m    4.43 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/radio-BCbvVchS.js                     [39m[1m[2m    4.47 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/liked-DYAPrNFC.js                     [39m[1m[2m    4.62 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ferrous_opencc_wasm-C4z4bXqf.js       [39m[1m[2m    4.74 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/BatchList-aqZWicpe.js                 [39m[1m[2m    5.18 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CopySongInfo-ULIOvt4d.js              [39m[1m[2m    5.57 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-n92j6PrO.js                    [39m[1m[2m    5.68 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ExcludeLyrics-hGVCtbj7.js             [39m[1m[2m    5.98 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/CoverList-CVZU6_yG.js                 [39m[1m[2m    6.83 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/index-BXxGsYCr.js                     [39m[1m[2m    7.03 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/playlist-B-9AbcMW.js                  [39m[1m[2m    7.64 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/useListActions-DVG0ABI4.js            [39m[1m[2m    7.85 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/FontManager-BFrqFwnX.js               [39m[1m[2m    7.92 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SongInfoEditor-9KgpRG5k.js            [39m[1m[2m    8.33 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-CO8aV85F.js                    [39m[1m[2m    8.34 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/index-C9U-1XZq.js                     [39m[1m[2m    8.37 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/UserAgreement-C7h4qXUJ.js             [39m[1m[2m    9.22 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/ThemeConfig-D4TuLXmG.js               [39m[1m[2m    9.45 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/layout-DVUz8PLb.js                    [39m[1m[2m    9.84 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/index-DuEQEBZm.js                     [39m[1m[2m   11.05 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/Login-DAU2vgg_.js                     [39m[1m[2m   11.14 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/wiki-Dci2PXfm.js                      [39m[1m[2m   11.36 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/index-C0_9hHDk.js                     [39m[1m[2m   16.00 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/SongList-C3hEvZGE.js                  [39m[1m[2m   22.49 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/useSortable-Cc5LKbDD-Cue98ULu.js      [39m[1m[2m   37.66 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/MainSetting-B08pjc1O.js               [39m[1m[2m   91.46 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/Video-BkCndA05.js                     [39m[1m[2m  118.95 kB[22m[1m[22m
+[2mout/renderer/[22m[36massets/stores-jhWxtWj4.js                    [39m[1m[33m2,105.27 kB[39m[22m
+[33m
+(!) Some chunks are la
+rger than 500 kB after
+ minification. Conside
+r:
+- Using dynamic import
+() to code-split the a
+pplication
+- Use build.rollupOpti
+ons.output.manualChunk
+s to improve chunking:
+ https://rollupjs.org/
+configuration-options/
+#output-manualchunks
+- Adjust chunk size li
+mit for this warning v
+ia build.chunkSizeWarn
+ingLimit.[39m
+[32m鉁?built in 19.43s[39m
+
+鉁?[vite-plugin-compression]:algorithm=gzip - compressed file successfully: 
+renderer/assets/ABLoop-fBV_dcIg.js.gz                    3.26kb / gzip: 1.15kb
+renderer/assets/album-BEzRwxp2.js.gz                     3.74kb / gzip: 1.97kb
+renderer/assets/albums-BnLYjah7.css.gz                   1.50kb / gzip: 0.50kb
+renderer/assets/albums-BGebYtaR.js.gz                    1.99kb / gzip: 1.12kb
+renderer/assets/albums-BvfMl9rB.js.gz                    1.06kb / gzip: 0.69kb
+renderer/assets/albums-BsO0y9Uq.css.gz                   1.45kb / gzip: 0.48kb
+renderer/assets/albums-CkSKPklh.js.gz                    1.93kb / gzip: 1.08kb
+renderer/assets/ArtistList-D7CF5K31.js.gz                2.20kb / gzip: 1.08kb
+renderer/assets/AMLLServer-7EyTovc6.js.gz                1.98kb / gzip: 1.17kb
+renderer/assets/ArtistList-DjgFrwnA.css.gz               2.64kb / gzip: 0.75kb
+renderer/assets/artists-CiPi3ipF.js.gz                   1.06kb / gzip: 0.68kb
+renderer/assets/artists-CWFLAWeZ.js.gz                   1.72kb / gzip: 1.00kb
+renderer/assets/artists-DymO4_R-.css.gz                  1.16kb / gzip: 0.42kb
+renderer/assets/artists-Bw6evVYm.js.gz                   1.88kb / gzip: 1.10kb
+renderer/assets/artists-CMnSAeTe.css.gz                  1.11kb / gzip: 0.41kb
+renderer/assets/artists-n6ej-6_Y.js.gz                   1.95kb / gzip: 1.03kb
+renderer/assets/AutoClose-CSf8aWrd.js.gz                 2.32kb / gzip: 1.11kb
+renderer/assets/BatchList-aqZWicpe.js.gz                 5.06kb / gzip: 2.30kb
+renderer/assets/Cloud-D6Mt3S2b.css.gz                    1.46kb / gzip: 0.51kb
+renderer/assets/CloudMatch-7Xa2Dwtq.js.gz                2.63kb / gzip: 1.28kb
+renderer/assets/ContextMenuManager-4iJ3nHZS.js.gz        1.43kb / gzip: 0.85kb
+renderer/assets/Cloud-DLsKaPAV.js.gz                     3.48kb / gzip: 1.77kb
+renderer/assets/CopyLyrics-CBYA9T9f.js.gz                2.71kb / gzip: 1.24kb
+renderer/assets/CoverManager-CYQLoFLR.js.gz              1.50kb / gzip: 0.86kb
+renderer/assets/CopySongInfo-ULIOvt4d.js.gz              5.44kb / gzip: 1.73kb
+renderer/assets/CoverList-Bv25DlOj.css.gz                4.55kb / gzip: 1.12kb
+renderer/assets/CreatePlaylist-W-H2sxEp.js.gz            2.66kb / gzip: 1.22kb
+renderer/assets/DailySongs-BDMttQ5c.js.gz                1.72kb / gzip: 1.00kb
+renderer/assets/CoverList-CVZU6_yG.js.gz                 6.67kb / gzip: 2.79kb
+renderer/assets/CustomCode-cey8IF5d.js.gz                2.14kb / gzip: 1.19kb
+renderer/assets/Equalizer-zf6rzJlc.js.gz                 2.48kb / gzip: 1.32kb
+renderer/assets/downloading-9i5Inbbz.js.gz               3.08kb / gzip: 1.37kb
+renderer/assets/ExcludeLyrics-wfYCIos3.css.gz            1.23kb / gzip: 0.38kb
+renderer/assets/downloading-BiBe1cxq.css.gz              3.12kb / gzip: 0.63kb
+renderer/assets/DownloadModal-B63dntK-.js.gz             4.01kb / gzip: 2.05kb
+renderer/assets/ExcludeLyrics-hGVCtbj7.js.gz             5.84kb / gzip: 2.19kb
+renderer/assets/ExcludeComment-4ZMYsFwW.js.gz            4.32kb / gzip: 1.68kb
+renderer/assets/ferrous_opencc_wasm-C4z4bXqf.js.gz       4.63kb / gzip: 1.69kb
+renderer/assets/folders-CgbtTciT.js.gz                   3.03kb / gzip: 1.51kb
+renderer/assets/FontManager-DfBBFGi_.css.gz              1.55kb / gzip: 0.45kb
+renderer/assets/FontManager-BFrqFwnX.js.gz               7.73kb / gzip: 2.60kb
+renderer/assets/FullscreenPlayerManager-Cqcmldaz.js.gz   1.19kb / gzip: 0.69kb
+renderer/assets/HomePageSectionManager-B94ZyNIk.js.gz    1.36kb / gzip: 0.74kb
+renderer/assets/hot-DxU3yaj1.js.gz                       2.74kb / gzip: 1.27kb
+renderer/assets/History-8thp_Axu.js.gz                   1.79kb / gzip: 1.01kb
+renderer/assets/index-BXxGsYCr.js.gz                     6.86kb / gzip: 2.80kb
+renderer/assets/index-C9U-1XZq.js.gz                     8.17kb / gzip: 3.38kb
+renderer/assets/index-Cf7DLkkm.css.gz                    5.00kb / gzip: 1.11kb
+renderer/assets/index-Cw2DZQKM.css.gz                    6.35kb / gzip: 1.58kb
+renderer/assets/JumpArtist-wzXmNYRD.js.gz                2.07kb / gzip: 1.19kb
+renderer/assets/index-C0_9hHDk.js.gz                     15.62kb / gzip: 5.98kb
+renderer/assets/index-CYSGTrF-.css.gz                    6.49kb / gzip: 1.31kb
+renderer/assets/index-DuEQEBZm.js.gz                     10.79kb / gzip: 4.05kb
+renderer/assets/layout-8QmTaT_N.css.gz                   1.07kb / gzip: 0.42kb
+renderer/assets/layout-BsSlou4Z.js.gz                    1.35kb / gzip: 0.72kb
+renderer/assets/layout-BYAvJ5Bt.js.gz                    3.33kb / gzip: 1.50kb
+renderer/assets/layout-Cvk_DVL8.js.gz                    2.34kb / gzip: 1.11kb
+renderer/assets/layout-co-8SHQ_.js.gz                    1.76kb / gzip: 0.87kb
+renderer/assets/layout-Dj3fqLzw.css.gz                   3.28kb / gzip: 0.88kb
+renderer/assets/index-BmV9ucOa.css.gz                    38.01kb / gzip: 7.18kb
+renderer/assets/layout-DwNx3lea.css.gz                   1.92kb / gzip: 0.61kb
+renderer/assets/layout-CO8aV85F.js.gz                    8.15kb / gzip: 2.91kb
+renderer/assets/layout-ndXvHAqW.css.gz                   1.80kb / gzip: 0.55kb
+renderer/assets/layout-DVUz8PLb.js.gz                    9.61kb / gzip: 3.41kb
+renderer/assets/liked-DYAPrNFC.js.gz                     4.51kb / gzip: 2.24kb
+renderer/assets/ListComment-fNqUCLQb.js.gz               3.19kb / gzip: 1.50kb
+renderer/assets/LocalMusicDirectory-DE3otEVb.js.gz       1.41kb / gzip: 0.86kb
+renderer/assets/loading-BRrDQiAC.css.gz                  1.75kb / gzip: 0.76kb
+renderer/assets/Login-IA9uhXwl.css.gz                    2.04kb / gzip: 0.63kb
+renderer/assets/layout-n92j6PrO.js.gz                    5.55kb / gzip: 2.40kb
+renderer/assets/new-C5Z_9hAI.js.gz                       2.23kb / gzip: 1.11kb
+renderer/assets/MainSetting-L5xKJkz6.css.gz              7.97kb / gzip: 1.89kb
+renderer/assets/playlists-B1cX6vx9.js.gz                 1.08kb / gzip: 0.69kb
+renderer/assets/PlaylistAdd-CPaVMsQW.js.gz               3.64kb / gzip: 1.53kb
+renderer/assets/Login-DAU2vgg_.js.gz                     10.88kb / gzip: 4.47kb
+renderer/assets/playlist-B-9AbcMW.js.gz                  7.46kb / gzip: 3.32kb
+renderer/assets/radios-DuAHXk_E.js.gz                    1.08kb / gzip: 0.70kb
+renderer/assets/playlists-ChdKkeZ7.js.gz                 3.32kb / gzip: 1.59kb
+renderer/assets/ScalingModal-mHBTIElf.js.gz              1.01kb / gzip: 0.64kb
+renderer/assets/SidebarHideManager-M10w0p9q.js.gz        1.37kb / gzip: 0.84kb
+renderer/assets/radio-BCbvVchS.js.gz                     4.37kb / gzip: 2.22kb
+renderer/assets/SongDataCard-Db13SWvD.css.gz             1.65kb / gzip: 0.50kb
+renderer/assets/SongDataCard-979qCCjG.js.gz              1.73kb / gzip: 0.83kb
+renderer/assets/SongListCard-BgfrB8Gw.js.gz              2.12kb / gzip: 0.94kb
+renderer/assets/SongList-BRYiZxTo.css.gz                 8.37kb / gzip: 1.70kb
+renderer/assets/songs-BLuQQqdI.js.gz                     1.06kb / gzip: 0.71kb
+renderer/assets/SongInfoEditor-9KgpRG5k.js.gz            8.13kb / gzip: 2.83kb
+renderer/assets/SongListCard-zCDYsL3o.css.gz             1.85kb / gzip: 0.56kb
+renderer/assets/ThemeConfig-DmQXuMKI.css.gz              2.11kb / gzip: 0.61kb
+renderer/assets/SongUnlockManager-Bx5WKMW-.js.gz         1.15kb / gzip: 0.80kb
+renderer/assets/streaming-playlist-D0KE82q8.js.gz        2.46kb / gzip: 1.46kb
+renderer/assets/StreamingServerConfig-D3B2afQo.js.gz     2.73kb / gzip: 1.23kb
+renderer/assets/ThemeConfig-D4TuLXmG.js.gz               9.23kb / gzip: 3.02kb
+renderer/assets/toplists-IoKtzaKc.js.gz                  2.24kb / gzip: 1.09kb
+renderer/assets/SongList-C3hEvZGE.js.gz                  21.96kb / gzip: 7.60kb
+renderer/assets/UpdateApp-Bj3z_etP.js.gz                 2.26kb / gzip: 1.17kb
+renderer/assets/type-C5JIUrJu.js.gz                      1.70kb / gzip: 0.90kb
+renderer/assets/UpdatePlaylist-BsLZmG9Z.js.gz            2.50kb / gzip: 1.33kb
+renderer/assets/useListActions-PSay3IW_.css.gz           5.30kb / gzip: 1.16kb
+renderer/assets/useListActions-DVG0ABI4.js.gz            7.67kb / gzip: 3.02kb
+renderer/assets/videos-BnzeBDaM.js.gz                    1.10kb / gzip: 0.72kb
+renderer/assets/UserAgreement-C7h4qXUJ.js.gz             9.00kb / gzip: 3.63kb
+renderer/assets/Video-T8Iy3B4F.css.gz                    33.66kb / gzip: 5.45kb
+renderer/assets/wiki-B-F1qi9f.css.gz                     2.97kb / gzip: 0.76kb
+renderer/web/loading/index.html.gz                       2.45kb / gzip: 1.10kb
+renderer/assets/useSortable-Cc5LKbDD-Cue98ULu.js.gz      36.78kb / gzip: 12.61kb
+renderer/assets/stores-BVlY4id6.css.gz                   72.30kb / gzip: 11.32kb
+renderer/assets/wiki-Dci2PXfm.js.gz                      11.09kb / gzip: 3.83kb
+renderer/assets/MainSetting-B08pjc1O.js.gz               89.31kb / gzip: 27.38kb
+renderer/assets/Video-BkCndA05.js.gz                     116.16kb / gzip: 34.48kb
+renderer/assets/stores-jhWxtWj4.js.gz                    2055.93kb / gzip: 593.96kb
+
+
+[1m[92m   Compiling
+[0m app v0.1.0 (E:\Spl
+ayer_Android\src-tauri
+)
+[1m[93mwarning[0m[
+1m[97m: unused import
+: `AudioOutputStream`
+[0m
+ [1m[96m--> [0msrc\
+audio_player.rs:8:26
+  [1m[96m|[0m
+[1m[96m8[0m [1m[9
+6m|[0m     AudioOutpu
+tCallback, AudioOutput
+Stream, AudioStreamBui
+lder, AudioStream,
+  [1m[96m|[0m      
+                    [
+1m[93m^^^^^^^^^^^^^^^
+^^[0m
+  [1m[96m|[0m
+  [1m[96m= [0m[1m
+[97mnote[0m: `#[warn(
+unused_imports)]` (par
+t of `#[warn(unused)]`
+) on by default
+
+[1m[91merror[E0596]
+[0m[1m[97m: cannot b
+orrow `probed.metadata
+` as mutable, as `prob
+ed` is not declared as
+ mutable[0m
+   [1m[96m--> [0msr
+c\audio_player.rs:382:
+37
+    [1m[96m|[0m
+[1m[96m382[0m [1m
+[96m|[0m         if l
+et Some(metadata_rev) 
+= probed.metadata.get(
+).as_ref().and_then(|m
+| m.current()) {
+    [1m[96m|[0m    
+                      
+           [1m[91m^^
+^^^^^^^^^^^^^[0m [1m
+[91mcannot borrow as 
+mutable[0m
+    [1m[96m|[0m
+[1m[96mhelp[0m: con
+sider changing this to
+ be mutable
+    [1m[96m|[0m
+[1m[96m351[0m [1m
+[96m| [0m        let 
+[92mmut [0mprobed = 
+match symphonia::defau
+lt::get_probe().format
+(
+    [1m[96m|[0m    
+         [92m+++[0m
+
+[1m[93mwarning[0m[
+1m[97m: unused variab
+le: `target_sample_rat
+e`[0m
+   [1m[96m--> [0msr
+c\audio_player.rs:433:
+13
+    [1m[96m|[0m
+[1m[96m433[0m [1m
+[96m|[0m         let 
+target_sample_rate = {
+    [1m[96m|[0m    
+         [1m[93m^^^^
+^^^^^^^^^^^^^^[0m [1
+m[93mhelp: if this is
+ intentional, prefix i
+t with an underscore: 
+`_target_sample_rate`
+[0m
+    [1m[96m|[0m
+    [1m[96m= [0m[1
+m[97mnote[0m: `#[war
+n(unused_variables)]` 
+(part of `#[warn(unuse
+d)]`) on by default
+
+[1m[97mFor more info
+rmation about this err
+or, try `rustc --expla
+in E0596`.[0m
+[1m[93mwarning[0m: 
+`app` (lib) generated 
+2 warnings
+[1m[91merror[0m: co
+uld not compile `app` 
+(lib) due to 1 previou
+s error; 2 warnings em
+itted
+failed to build Androi
+d app: `Failed to run 
+`cargo build`: command
+ ["cargo", "build", "-
+-package", "app", "--m
+anifest-path", "E:\\Sp
+layer_Android\\src-tau
+ri\\Cargo.toml", "--ta
+rget", "aarch64-linux-
+android", "--features"
+, "tauri/custom-protoc
+ol", "--lib"] exited w
+ith code 101
+       Error failed to
+ build Android app: `F
+ailed to run `cargo bu
+ild`: command ["cargo"
+, "build", "--package"
+, "app", "--manifest-p
+ath", "E:\\Splayer_And
+roid\\src-tauri\\Cargo
+.toml", "--target", "a
+arch64-linux-android",
+ "--features", "tauri/
+custom-protocol", "--l
+ib"] exited with code 
+101

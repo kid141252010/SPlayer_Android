@@ -1,0 +1,11 @@
+﻿
+> splayer@3.0.0 typecheck:web E:\Splayer_Android
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+
+src/components/Player/PlayerLyric/AMLyric.vue(30,10): error TS2322: Type '{ words: { startTime: number; endTime: number; word: string; romanWord: string; }[]; translatedLyric: string; romanLyric: string; isBG: boolean; isDuet: boolean; startTime: number; endTime: number; }[]' is not assignable to type 'LyricLine[]'.
+  Type '{ words: { startTime: number; endTime: number; word: string; romanWord: string; }[]; translatedLyric: string; romanLyric: string; isBG: boolean; isDuet: boolean; startTime: number; endTime: number; }' is not assignable to type 'LyricLine'.
+    Types of property 'words' are incompatible.
+      Type '{ startTime: number; endTime: number; word: string; romanWord: string; }[]' is not assignable to type 'LyricWord[]'.
+        Property 'obscene' is missing in type '{ startTime: number; endTime: number; word: string; romanWord: string; }' but required in type 'LyricWord'.
+src/components/Player/PlayerLyric/AMLyric.vue(58,36): error TS6133: 'LyricLine' is declared but its value is never read.
+鈥塃LIFECYCLE鈥?Command failed with exit code 2.

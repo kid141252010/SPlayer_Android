@@ -1,0 +1,150 @@
+:root {
+  --bg-color: #fff;
+  --font-coloe: #000;
+  --primary: #f55e55;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #161616;
+    --font-coloe: #fff;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  box-sizing: border-box;
+  -webkit-user-drag: none;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer {
+  position: absolute;
+  bottom: 20px;
+  font-size: 14px;
+  color: var(--primary);
+  opacity: 0.6;
+}
+
+.logo {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader,
+.loader:before,
+.loader:after {
+  border-radius: 50%;
+  width: 2.5em;
+  height: 2.5em;
+  animation-fill-mode: both;
+  animation: bblFadInOut 1.8s infinite ease-in-out;
+}
+
+.loader {
+  color: var(--primary);
+  font-size: 6px;
+  position: relative;
+  text-indent: -9999em;
+  transform: translateZ(0);
+  animation-delay: -0.16s;
+  margin: 40px 0;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  top: 0;
+}
+
+.loader:before {
+  left: -3.5em;
+  animation-delay: -0.32s;
+}
+
+.loader:after {
+  left: 3.5em;
+}
+
+#startApp {
+  opacity: 0;
+  margin-top: 10px;
+  outline: none;
+  border: 2px solid var(--primary);
+  height: 36px;
+  width: 90px;
+  font-size: 14px;
+  border-radius: 12px;
+  color: var(--primary);
+  font-weight: bold;
+  background-color: transparent;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+@keyframes bblFadInOut {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 2.5em 0 -1.3em;
+  }
+
+  40% {
+    box-shadow: 0 2.5em 0 0;
+  }
+}
+
+/* 适配移动端状态栏（刘海屏） */
+#app {
+  /* 顶出状态栏的高度 */
+  padding-top: max(env(safe-area-inset-top), 35px) !important;
+  /* 顺便把底部的小黑条/小白条手势区也避让开 */
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  /* 防止撑爆屏幕 */
+  box-sizing: content-box;
+}
+
+/* 如果 SPlayer 的顶部导航栏是固定悬浮 (fixed/absolute) 的，
+   你可能需要单独给那个导航栏加 paddingTop，比如： */
+.header, .nav-bar, .top-bar {
+  padding-top: max(env(safe-area-inset-top), 35px) !important;
+}
+/* 给状态栏留出的那条缝隙打个底色（黑或白，你可以根据 SPlayer 的主题自己换颜色） */
+body, html {
+  background-color: #121212; 
+}
+
+#app {
+  /* 1. 强行把整个应用的框子往下推出保底 35px 的距离（如果有安全距离就用安全距离） */
+  margin-top: max(env(safe-area-inset-top, 0px), 35px) !important;
+  
+  /* 2. 扣除掉往下推的距离，防止最底部的播放条被挤到屏幕外边去！ */
+  height: calc(100vh - max(env(safe-area-inset-top, 0px), 35px)) !important;
+  
+  /* 3. 【终极核心结界】：加上这行，所有 fixed 元素再也飞不到屏幕最顶端了，
+     它们的 top: 0 现在只能从 margin-top 下面的这条线开始算起！ */
+  transform: translateY(0) !important; 
+  
+  /* 防止多余的滚动条出现 */
+  overflow: hidden !important;
+}

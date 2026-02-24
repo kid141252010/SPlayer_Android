@@ -1,0 +1,58 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+task.md
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+out
+.env
+target
+*.node
+
+# Editor directories and files
+.vscode/*
+.vscode
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env.development
+.env.production
+
+# Docs
+docs/.vitepress/cache
+docs/.vitepress/dist
+
+.trae/*
+
+# Tauri Android
+src-tauri/gen/android
+src-tauri/target
+src-tauri/*.keystore
+src-tauri/keystore.properties
+src-tauri/err*.txt
+src-tauri/error.log
+src-tauri/new_err.log
+src-tauri/tauri
+src-tauri/tauri.js
+
+# Android Studio
+.gradle
+build
+captures
+.externalNativeBuild
+.cxx
+local.properties

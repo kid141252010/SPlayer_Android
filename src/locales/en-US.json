@@ -1,0 +1,40 @@
+{
+  "common": {
+    "play": "Play",
+    "pause": "Pause",
+    "speed": "Speed",
+    "settings": "Settings",
+    "normal": "Normal",
+    "quality": "Quality",
+    "pip": "Picture-in-Picture",
+    "enterFullscreen": "Enter Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "unknown_artist": "Unknown Artist",
+    "unknown_video": "Unknown Video",
+    "unknown_server": "Unknown Server",
+    "description_empty": "No description for this video"
+  },
+  "video": {
+    "comment": "Comment",
+    "hot": "Hot",
+    "new": "New",
+    "play_address_failed": "Failed to get playback address",
+    "load_failed": "Failed to load video address",
+    "get_data_failed": "Failed to get video data"
+  },
+  "streaming": {
+    "title": "Streaming",
+    "songs": "Songs",
+    "artists": "Artists",
+    "albums": "Albums",
+    "playlists": "Playlists",
+    "select_server": "Select Server",
+    "no_playlists": "No playlists",
+    "start_connection": "Start streaming connection",
+    "not_configured": "Streaming service not configured",
+    "not_connected": "Not connected to streaming server",
+    "no_songs": "No songs available"
+  }
+}

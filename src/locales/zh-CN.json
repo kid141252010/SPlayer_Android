@@ -1,0 +1,41 @@
+{
+  "common": {
+    "play": "播放",
+    "pause": "暂停",
+    "speed": "速度",
+    "settings": "设置",
+    "normal": "正常",
+    "quality": "画质",
+    "pip": "画中画",
+    "enterFullscreen": "开启全屏",
+    "exitFullscreen": "退出全屏",
+    "mute": "音量",
+    "unmute": "静音",
+    "unknown_artist": "未知歌手",
+    "unknown_video": "未知视频",
+    "unknown_server": "未知服务器",
+    "description_empty": "该视频暂无简介"
+  },
+  "video": {
+    "comment": "评论",
+    "hot": "最热",
+    "new": "最新",
+    "play_address_failed": "播放地址获取失败",
+    "load_failed": "视频地址加载失败",
+    "get_data_failed": "获取视频数据失败"
+  },
+  "streaming": {
+    "title": "流媒体",
+    "songs": "单曲",
+    "songs_unit": "首歌曲",
+    "artists": "歌手",
+    "albums": "专辑",
+    "playlists": "歌单",
+    "select_server": "选择服务器",
+    "no_playlists": "暂无歌单",
+    "start_connection": "开始流媒体连接",
+    "not_configured": "尚未配置流媒体服务",
+    "not_connected": "未连接到流媒体服务器",
+    "no_songs": "当前没有歌曲"
+  }
+}
