@@ -66,6 +66,7 @@
 ## 👀 Demo
 
 - 在线演示：[SPlayer](https://splayer.20100907.xyz)
+  > 注：本演示来自[池鱼鱼](https://github.com/kazukokawagawa)
 
   > 如打不开，说明已经失效请自行前往 [获取](#️-获取)
 
@@ -149,117 +150,13 @@
 
 #### 稳定版
 
-通常情况下，可以在 [Releases](https://github.com/imsyy/SPlayer/releases) 中获取稳定版
-
-也可前往 [SPlayer 官网](https://splayer.imsyy.top/) 获取稳定版
+通常情况下，可以在 [Releases](https://github.com/kid141252010/SPlayer_Android/releases) 中获取稳定版
 
 #### 开发版
 
-可以通过 GitHub Actions 工作流获取最新的开发版
+可以通过 GitHub Actions 工作流获取最新的安卓版
 
-[Dev Workflow](https://github.com/imsyy/SPlayer/actions/workflows/dev.yml)
-
-### 自行部署方案
-
-#### ⚙️ Docker 部署
-
-> 安装及配置 `Docker` 将不在此处说明，请自行解决
-
-##### 本地构建
-
-> 请尽量拉取最新分支后使用本地构建方式，在线部署的仓库可能更新不及时
-
-```bash
-# 构建
-docker build -t splayer .
-
-# 运行
-docker run -d --name SPlayer -p 25884:25884 splayer
-# 或使用 Docker Compose
-docker-compose up -d
-```
-
-Docker 镜像内包含网页端以及运行所需的服务，默认通过 `25884` 端口访问。
-
-##### 在线部署
-
-```bash
-# 从 Docker Hub 拉取
-docker pull imsyy/splayer:latest
-# 从 GitHub ghcr 拉取
-docker pull ghcr.io/imsyy/splayer:latest
-
-# 运行
-docker run -d --name SPlayer -p 25884:25884 imsyy/splayer:latest
-```
-
-以上步骤成功后，将会在本地 [localhost:25884](http://localhost:25884/) 启动，如需更换端口，请自行修改命令行中的第一个端口号
-
-#### ⚙️ Vercel 部署
-
-> 其他部署平台大致相同，在此不做说明
-
-1. 本程序依赖 [NeteaseCloudMusicApi](https://github.com/neteasecloudmusicapienhanced/api-enhanced) 运行，请确保您已成功部署该项目或兼容的项目，并成功取得在线访问地址
-2. 点击本仓库右上角的 `Fork`，复制本仓库到你的 `GitHub` 账号
-3. 复制 `/.env.example` 文件并重命名为 `/.env`
-4. 将 `.env` 文件中的 `VITE_API_URL` 改为第一步得到的 API 地址
-
-   ```js
-   VITE_API_URL = "https://example.com";
-   ```
-
-5. 将 `Build and Output Settings` 中的 `Output Directory` 改为 `out/renderer`
-
-   ![build](/screenshots/build.jpg)
-
-6. 点击 `Deploy`，即可成功部署
-
-#### ⚙️ 服务器部署
-
-1. 重复 `⚙️ Vercel 部署` 中的 1 - 4 步骤
-2. 克隆仓库
-
-   ```bash
-   git clone https://github.com/imsyy/SPlayer.git
-   ```
-
-3. 安装依赖
-
-   ```bash
-   pnpm install
-   ```
-
-4. 编译打包
-
-   ```bash
-   pnpm build
-   ```
-
-5. 将站点运行目录设置为 `out/renderer` 目录
-
-#### ⚙️ 本地部署
-
-1. 本地部署需要用到 `Node.js`（>= 20），可前往 [Node.js 官网](https://nodejs.org/zh-cn/) 下载安装包，请下载最新稳定版
-2. 安装 pnpm（>= 10）
-
-   ```bash
-   corepack enable
-   # 或
-   npm install pnpm -g
-   ```
-
-3. 克隆仓库并拉取至本地，此处不再赘述
-4. 使用 `pnpm install` 安装项目依赖（若安装过程中遇到网络错误，请使用国内镜像源替代，此处不再赘述）
-5. 复制 `.env.example` 文件并重命名为 `.env` 并修改配置（如需跳过原生模块构建，可设置 `SKIP_NATIVE_BUILD=true`）
-6. 打包客户端，请依据你的系统类型来选择，打包成功后，会输出安装包或可执行文件在 `/dist` 目录中，可自行安装
-
-   > 默认情况下，构建命令仅会构建当前系统架构的版本。如需构建特定架构（如 x64 + arm64），请在命令后追加参数，例如：`pnpm build:win -- --x64 --arm64`
-
-   | 命令               | 系统类型 |
-   | ------------------ | -------- |
-   | `pnpm build:win`   | Windows  |
-   | `pnpm build:linux` | Linux    |
-   | `pnpm build:mac`   | macOS    |
+[Dev Workflow](https://github.com/kid141252010/SPlayer_Android/actions/workflows/dev.yml)
 
 ## 😘 鸣谢
 
