@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_VERSION: ''
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
     strategy:
       matrix:
         include:
@@ -82,7 +83,7 @@ jobs:
           fi
 
       - name: Decode Keystore
-        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > src-tauri/splayer.keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
