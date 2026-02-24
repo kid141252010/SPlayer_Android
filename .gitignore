@@ -39,7 +39,7 @@ docs/.vitepress/dist
 .trae/*
 
 # Tauri Android
-src-tauri/gen/android
+# src-tauri/gen/android # Committing to ensure CI build has the custom build environment and manifest
 src-tauri/target
 src-tauri/*.keystore
 src-tauri/keystore.properties
