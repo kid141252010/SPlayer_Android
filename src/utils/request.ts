@@ -7,9 +7,11 @@ import axiosRetry from "axios-retry";
 
 // 全局地址
 const baseURL: string = String(
-  isDev
+  isDev && !import.meta.env["VITE_API_BASE_URL"]
     ? "/api/netease"
-    : import.meta.env["VITE_API_BASE_URL"] || import.meta.env["VITE_API_URL"],
+    : import.meta.env["VITE_API_BASE_URL"] ||
+    import.meta.env["VITE_API_URL"] ||
+    "https://api.music.1412520.xyz",
 );
 
 // 基础配置
