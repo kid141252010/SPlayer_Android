@@ -192,6 +192,8 @@ class PlayerController {
   private automixScheduledToken: number | null = null;
   private automixScheduledNextId: number | string | null = null;
   private automixLogTimestamps = new Map<string, number>();
+  /** 是否已为当前歌曲预取了下一首 */
+  private hasPreloadedNext = false;
 
   private formatAutomixTime(seconds: number): string {
     if (!Number.isFinite(seconds)) return "--:--";
@@ -632,6 +634,7 @@ class PlayerController {
     this.automixLogTimestamps.clear();
     this.currentAnalysisKey = null;
     this.currentAudioSource = null;
+    this.hasPreloadedNext = false;
 
     // 生成新的请求标识
     this.currentRequestToken++;
@@ -1862,6 +1865,28 @@ class PlayerController {
 
       // Socket 进度
       playerIpc.sendSocketProgress(currentTime, duration);
+
+      // Smart Preload (Android Gapless)
+      if (
+        isTauri &&
+        !this.hasPreloadedNext &&
+        duration > 30000 && // Only for songs > 30s
+        currentTime > duration * 0.9 // Trigger at 90%
+      ) {
+        const nextInfo = this.getNextSongForAutomix();
+        if (nextInfo) {
+          useSongManager()
+            .getAudioSource(nextInfo.song)
+            .then((src) => {
+              if (src.url) {
+                console.log("🚀 [Smart Preload] Preloading next song:", nextInfo.song.name);
+                audioManager.preload(src.url);
+                this.hasPreloadedNext = true;
+              }
+            })
+            .catch(() => { });
+        }
+      }
     }, 50);
     audioManager.addEventListener("timeupdate", this.onTimeUpdate);
 

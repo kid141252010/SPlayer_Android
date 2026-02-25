@@ -29,8 +29,6 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   private _metadata: any = null;
   private _currentTime: number = 0;
   private _paused: boolean = true;
-  private _timer: number | null = null;
-  private _ended: boolean = false;
   private _unlistenEnded: UnlistenFn | null = null;
 
   constructor() {
@@ -42,20 +40,39 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     try {
       this._unlistenEnded = await listen("audioplayer://ended", () => {
         if (!this._switching) {
-          this._ended = true;
           this._paused = true;
-          this.stopTimer();
           this.dispatch(AUDIO_EVENTS.ENDED, undefined);
           this.syncNativeState();
         }
+      });
+
+      // 监听进度事件 (取代轮询)
+      await listen<{ position: number; duration: number }>("audioplayer://progress", (event) => {
+        this._currentTime = event.payload.position;
+        this._duration = event.payload.duration;
+        this.dispatch(AUDIO_EVENTS.TIME_UPDATE, undefined);
+
+        // 每 1s 同步一次进度到原生 MediaSession
+        if (Math.floor(this._currentTime) !== Math.floor(this._lastSyncTime)) {
+          this._lastSyncTime = this._currentTime;
+          this.syncNativeState();
+        }
+      });
+
+      // 监听元数据事件 (取代轮询)
+      await listen<{ duration: number; title: string; artist: string; album: string }>("audioplayer://metadata", (event) => {
+        const meta = event.payload;
+        this._duration = meta.duration;
+        this._metadata = meta;
+        this.dispatch(AUDIO_EVENTS.DURATION_CHANGE, undefined);
+        this.syncNativeMetadata(meta);
+        console.log("[NativePlayer] Metadata Event received:", meta);
       });
 
       // 监听 Android 原生 MediaSession 事件
       await listen("plugin:NativeMedia|play", () => this.resume());
       await listen("plugin:NativeMedia|pause", () => this.pause());
       await listen("plugin:NativeMedia|next", () => {
-        // 使用字符串直接分发，避开枚举带来的类型限制，
-        // 同时在外部（PlayerController）监听这些自定义事件。
         this.dispatch("skip_next" as any, undefined);
       });
       await listen("plugin:NativeMedia|previous", () => {
@@ -82,22 +99,19 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   private _playGen: number = 0;
   /** 切歌进行中（play_audio 已发送但新歌尚未开始）— 跳过 ENDED 检测 */
   private _switching: boolean = false;
+  /** 上次同步 MediaSession 的时间 */
+  private _lastSyncTime: number = 0;
 
   public async play(url?: string, options?: PlayOptions): Promise<void> {
     const shouldPlay = options?.autoPlay ?? true;
     if (url) {
       // 递增版本号，使旧的 play() 续体失效
       const gen = ++this._playGen;
-      this._switching = true; // 进入切换状态，timer 期间跳过 ENDED 检测
+      this._switching = true; // 进入切换状态，期间跳过 ENDED 检测
 
-      this._src = url;
-      this._ended = false;
       this._currentTime = options?.seek ?? 0;
       this._duration = 0;
       this._metadata = null;
-
-      // 先停止旧的定时器，避免旧歌状态轮询干扰新歌
-      this.stopTimer();
 
       try {
         this.dispatch(AUDIO_EVENTS.LOAD_START, undefined);
@@ -115,19 +129,12 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
         // 如果在等待 play_audio 期间已经切歌，放弃
         if (gen !== this._playGen) return;
 
-        // Fetch duration (symphonia parses metadata on decode start)
-        await this._fetchDuration(gen);
-
-        // 再次检查：_fetchDuration 耗时最长 4s，期间可能已切歌
-        if (gen !== this._playGen) return;
-
         this._switching = false; // 新歌已就绪，允许 ENDED 检测
         this._paused = false;
         this.dispatch(AUDIO_EVENTS.CAN_PLAY, undefined);
         this.dispatch(AUDIO_EVENTS.PLAY, undefined);
         this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
 
-        this.startTimer();
       } catch (e) {
         if (gen !== this._playGen) return; // 切歌后的错误忽略
         console.error("[NativePlayer] play failed:", e);
@@ -142,7 +149,6 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     try {
       await invoke("pause_audio");
       this._paused = true;
-      this.stopTimer();
       this.dispatch(AUDIO_EVENTS.PAUSE, undefined);
       this.syncNativeState();
     } catch (e) {
@@ -154,8 +160,6 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     try {
       await invoke("resume_audio");
       this._paused = false;
-      this._ended = false;
-      this.startTimer();
       this.dispatch(AUDIO_EVENTS.PLAY, undefined);
       this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
       this.syncNativeState();
@@ -169,15 +173,12 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     invoke("stop_audio").catch(console.error);
     this._paused = true;
     this._currentTime = 0;
-    this._ended = false;
-    this.stopTimer();
   }
 
   public seek(time: number): void {
     invoke("seek_audio", { time })
       .then(() => {
         this._currentTime = time;
-        this._ended = false;
         this.dispatch(AUDIO_EVENTS.TIME_UPDATE, undefined);
         this.syncNativeState();
       })
@@ -248,92 +249,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
 
   // ========== Internal ==========
 
-  /** 防止定时器 tick 并发执行（IPC 延迟可能超过 50ms） */
-  private _tickBusy: boolean = false;
-
-  /**
-   * 定时轮询 Rust 后端获取播放进度和状态
-   */
-  private startTimer() {
-    this.stopTimer();
-    this._timer = window.setInterval(async () => {
-      // 跳过本次 tick（上一次仍在执行中）
-      if (this._tickBusy) return;
-      this._tickBusy = true;
-      try {
-        // Get current position
-        const time = await invoke<number>("get_position");
-        this._currentTime = time;
-        this.dispatch(AUDIO_EVENTS.TIME_UPDATE, undefined);
-
-        // Check if playback ended naturally
-        if (!this._ended && !this._paused && !this._switching) {
-          const isPlaying = await invoke<boolean>("get_playback_state");
-          if (!isPlaying && this._currentTime > 0) {
-            this._ended = true;
-            this._paused = true;
-            this.stopTimer();
-            this.dispatch(AUDIO_EVENTS.ENDED, undefined);
-            this.syncNativeState();
-            return;
-          }
-        }
-
-        // 每 1s 同步一次进度到原生 MediaSession
-        if (Math.floor(this._currentTime % 1) === 0) {
-          this.syncNativeState();
-        }
-      } catch (_e) {
-        // ignore polling errors
-      } finally {
-        this._tickBusy = false;
-      }
-    }, 50);
-  }
-
-  private stopTimer() {
-    if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = null;
-    }
-  }
-
-  /**
-   * 异步获取音频时长（解码线程需要一点时间来解析元数据）
-   * @param gen 播放版本号，用于检测是否已切歌
-   */
-  private async _fetchDuration(gen: number) {
-    for (let attempt = 0; attempt < 20; attempt++) {
-      await new Promise((r) => setTimeout(r, 200));
-      // 等待期间已切歌，立即退出
-      if (gen !== this._playGen) return;
-      try {
-        const dur = await invoke<number>("get_duration");
-        if (gen !== this._playGen) return;
-        if (dur > 0) {
-          this._duration = dur;
-          this.dispatch(AUDIO_EVENTS.DURATION_CHANGE, undefined);
-
-          try {
-            const meta = await invoke<any>("get_metadata");
-            if (gen !== this._playGen) return;
-            if (meta) {
-              this._metadata = meta;
-              this.syncNativeMetadata(meta);
-              console.log("[NativePlayer] Metadata loaded:", meta);
-            }
-          } catch (e) {
-            console.warn("[NativePlayer] Failed to fetch metadata", e);
-          }
-          return;
-        }
-      } catch (_e) {
-        // ignore
-      }
-    }
-  }
-
-  // Optional methods stub
+  // (Removed _tickBusy, _timer, startTimer, stopTimer, _fetchDuration)
   private syncNativeState() {
     invoke("plugin:NativeMedia|updatePlaybackState", {
       isPlaying: !this._paused,

@@ -76,13 +76,15 @@ const saveLogin = async (loginData: any, type: LoginType = "qr") => {
     if (type !== "uid") setCookies(loginData.cookie);
     // 保存登录时间
     localStorage.setItem("lastLoginTime", Date.now().toString());
-    // 获取用户信息
-    if (type !== "uid") {
-      await updateUserData();
-    } else {
-      await updateSpecialUserData(loginData?.profile);
-    }
-    emit("success");
+    // 获取用户信息 (增加延迟以避开 UI 动画巅峰)
+    setTimeout(async () => {
+      if (type !== "uid") {
+        await updateUserData();
+      } else {
+        await updateSpecialUserData(loginData?.profile);
+      }
+      emit("success");
+    }, 300);
   } else {
     window.$message.error(loginData.msg ?? loginData.message ?? "账号或密码错误，请重试");
   }

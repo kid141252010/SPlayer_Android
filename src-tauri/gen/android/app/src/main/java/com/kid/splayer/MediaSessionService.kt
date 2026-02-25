@@ -93,6 +93,10 @@ class MediaSessionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // 立即启动前台服务，防止系统在 5-10 秒后杀掉服务 (Android 12+ 限制)
+        val initialNotification = createNotification("SPlayer", "Ready to play")
+        startForeground(notificationId, initialNotification)
+
         if (intent == null) return START_STICKY
 
         when (intent.action) {

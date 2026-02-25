@@ -17,6 +17,20 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 use tauri::{State, Emitter, AppHandle, Manager};
 
+#[derive(Clone, serde::Serialize)]
+struct MetadataPayload {
+    duration: f32,
+    title: Option<String>,
+    artist: Option<String>,
+    album: Option<String>,
+}
+
+#[derive(Clone, serde::Serialize)]
+struct ProgressPayload {
+    position: f32,
+    duration: f32,
+}
+
 // ============================================================
 // Streaming support for HTTP Audio
 // ============================================================
@@ -493,11 +507,22 @@ impl AudioState {
                 st.duration_secs = dur;
                 st.metadata = Some(AudioMetadata {
                     duration_secs: dur,
+                    title: title.clone(),
+                    artist: artist.clone(),
+                    album: album.clone(),
+                });
+            }
+
+            // Emit metadata event instantly
+            let _ = app_handle.emit(
+                "audioplayer://metadata",
+                MetadataPayload {
+                    duration: dur,
                     title,
                     artist,
                     album,
-                });
-            }
+                },
+            );
         }
 
         // ---- Create decoder ----
@@ -554,10 +579,26 @@ impl AudioState {
         }
 
         // ---- Decode loop ----
+        let mut last_progress_emit = std::time::Instant::now();
 
         loop {
             if stop_flag.load(Ordering::Relaxed) {
                 break;
+            }
+
+            // Emit progress event every 50ms for smooth lyric sync
+            if last_progress_emit.elapsed() >= Duration::from_millis(50) {
+                if let Ok(st) = status.lock() {
+                    let pos = st.position_samples as f32 / st.sample_rate as f32;
+                    let _ = app_handle.emit(
+                        "audioplayer://progress",
+                        ProgressPayload {
+                            position: pos,
+                            duration: st.duration_secs,
+                        },
+                    );
+                }
+                last_progress_emit = std::time::Instant::now();
             }
 
             // Check for seek request

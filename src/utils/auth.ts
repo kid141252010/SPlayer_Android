@@ -317,9 +317,9 @@ export const updateUserLikePlaylist = async () => {
     }
     return;
   }
-  // 计算数量
+  // 计算数量 (Android 限制：首次登录不建议同步过多歌单以防止内存/桥接压力)
   const { createdPlaylistCount, subPlaylistCount } = dataStore.userData;
-  const number = (createdPlaylistCount || 0) + (subPlaylistCount || 0) || 50;
+  const number = Math.min((createdPlaylistCount || 0) + (subPlaylistCount || 0) || 50, 100);
   const result = await userPlaylist(number, 0, userId);
   if (result && result.playlist) {
     dataStore.setUserLikeData("playlists", formatCoverList(result.playlist));

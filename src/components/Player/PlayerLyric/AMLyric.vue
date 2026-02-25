@@ -273,7 +273,7 @@ watch(lyricPlayerRef, (player) => {
   :deep(.am-lyric .lyric-line.current),
   :deep(.am-lyric .lyric-line.is-current) {
     color: #ffffff !important;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 4px 18px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     /* 告诉浏览器该元素可能会变化，优化渲染（强制开启硬件加速） */
     will-change: transform, opacity, color;
     transform: translateZ(0);
