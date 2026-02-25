@@ -24,6 +24,9 @@ class MainActivity : TauriActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         
+        // 注册插件
+        registerPlugin(NativeMediaPlugin(this))
+        
         checkNotificationPermission()
     }
 

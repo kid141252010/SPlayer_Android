@@ -1,6 +1,7 @@
 import { mediaSessionManager } from "@/core/player/MediaSessionManager";
 import { usePlayerController } from "@/core/player/PlayerController";
 import { updateTaskbarConfig } from "@/core/player/PlayerIpc";
+import { useAudioManager } from "@/core/player/AudioManager";
 import { useDownloadManager } from "@/core/resource/DownloadManager";
 import { useDataStore, useSettingStore, useShortcutStore, useStatusStore } from "@/stores";
 import { TASKBAR_IPC_CHANNELS } from "@/types/shared";
@@ -39,6 +40,8 @@ export const useInit = () => {
     openUserAgreement();
     // 加载数据
     await dataStore.loadData();
+    // 初始化播放引擎
+    useAudioManager().init();
     // 初始化 MediaSession
     mediaSessionManager.init();
     // 初始化播放器
