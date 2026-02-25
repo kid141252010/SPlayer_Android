@@ -264,7 +264,7 @@ class LyricManager {
     const musicStore = useMusicStore();
     settingStore.lyricPriority = source;
     if (musicStore.playSong) {
-      this.handleLyric(musicStore.playSong);
+      this.handleLyric(musicStore.playSong, true);
     }
   }
 
@@ -940,6 +940,9 @@ class LyricManager {
       return;
     }
     this.lastHandledSongId = song.id;
+
+    // 立即重置当前歌词状态，防止旧歌词闪烁
+    this.resetSongLyric();
 
     const statusStore = useStatusStore();
 

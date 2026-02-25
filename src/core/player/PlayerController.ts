@@ -1711,6 +1711,15 @@ class PlayerController {
       }
     });
 
+    // 时长更新
+    audioManager.addEventListener("durationchange", () => {
+      const duration = Math.floor(audioManager.duration * 1000);
+      if (duration > 0) {
+        statusStore.duration = duration;
+        mediaSessionManager.updateState(duration, statusStore.currentTime);
+      }
+    });
+
     // 播放开始
     audioManager.addEventListener("play", () => {
       const { name, artist } = getPlayerInfoObj() || {};

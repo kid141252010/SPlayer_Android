@@ -172,6 +172,8 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     invoke("stop_audio").catch(console.error);
     this._paused = true;
     this._currentTime = 0;
+    this._duration = 0;
+    this._metadata = null;
   }
 
   public seek(time: number): void {
