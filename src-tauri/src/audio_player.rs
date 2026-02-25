@@ -112,7 +112,7 @@ impl MediaSource for ProgressiveStream {
 // Commands sent from the frontend via Tauri IPC
 // ============================================================
 pub enum AudioCommand {
-    Play(String),
+    Play(String, bool),
     Preload(String),
     Pause,
     Resume,
@@ -305,7 +305,7 @@ impl AudioState {
             };
 
             match cmd {
-                AudioCommand::Play(url) => {
+                AudioCommand::Play(url, start_paused) => {
                     // ---- Stop existing playback ----
                     playing.store(false, Ordering::SeqCst);
                     decode_stop.store(true, Ordering::SeqCst);
@@ -347,7 +347,7 @@ impl AudioState {
                 let preloaded_for_decode = preloaded.clone();
 
                 _decode_handle = Some(thread::spawn(move || {
-                    Self::decode_thread(url, producer, arc_consumer, decode_stop_clone, status_for_decode, playing_for_decode, volume_for_decode, stream_ctx_for_decode, app_handle_clone, preloaded_for_decode);
+                    Self::decode_thread(url, start_paused, producer, arc_consumer, decode_stop_clone, status_for_decode, playing_for_decode, volume_for_decode, stream_ctx_for_decode, app_handle_clone, preloaded_for_decode);
                 }));
 
                 // Note: Oboe stream initialization is now executed inside the decode thread
@@ -419,6 +419,7 @@ impl AudioState {
     /// Decode thread: reads audio file with symphonia, writes PCM to ring buffer.
     fn decode_thread(
         url: String,
+        start_paused: bool,
         mut producer: ringbuf::HeapProd<f32>,
         consumer: Arc<Mutex<ringbuf::HeapCons<f32>>>,
         stop_flag: Arc<AtomicBool>,
@@ -572,9 +573,14 @@ impl AudioState {
         };
 
         // ---- Signal "playing" ----
-        playing.store(true, Ordering::SeqCst);
+        if !start_paused {
+            playing.store(true, Ordering::SeqCst);
+            if let Ok(mut st) = status.lock() {
+                st.is_playing = true;
+            }
+        }
+        
         if let Ok(mut st) = status.lock() {
-            st.is_playing = true;
             st.is_transitioning = false; // song is now loaded, safe for ENDED detection
         }
 
@@ -834,9 +840,9 @@ impl AudioState {
 }
 
 #[tauri::command]
-pub fn play_audio(state: State<AudioState>, url: String) -> Result<(), String> {
+pub fn play_audio(state: State<AudioState>, url: String, paused: Option<bool>) -> Result<(), String> {
     state.command_tx.lock().unwrap()
-        .send(AudioCommand::Play(url))
+        .send(AudioCommand::Play(url, paused.unwrap_or(false)))
         .map_err(|e| e.to_string())
 }
 

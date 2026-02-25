@@ -30,6 +30,8 @@ class AudioManager extends TypedEventTarget<AudioEventMap> implements IPlaybackE
   private cleanupListeners: (() => void) | null = null;
   /** 是否正在进行 Crossfade (避免事件干扰) */
   private isCrossfading: boolean = false;
+  /** 是否已初始化 */
+  private _initialized: boolean = false;
 
   /** 主音量 (用于 Crossfade 初始化) */
   private _masterVolume: number = 1.0;
@@ -99,6 +101,8 @@ class AudioManager extends TypedEventTarget<AudioEventMap> implements IPlaybackE
    * 初始化
    */
   public init(): void {
+    if (this._initialized) return;
+    this._initialized = true;
     this.engine.init();
   }
 

@@ -30,12 +30,16 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   private _currentTime: number = 0;
   private _paused: boolean = true;
   private _unlistenEnded: UnlistenFn | null = null;
+  private _initialized: boolean = false;
 
   constructor() {
     super();
   }
 
   public async init() {
+    if (this._initialized) return;
+    this._initialized = true;
+
     // 监听 Rust 发送的音频结束事件
     try {
       this._unlistenEnded = await listen("audioplayer://ended", () => {
@@ -116,24 +120,19 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       try {
         this.dispatch(AUDIO_EVENTS.LOAD_START, undefined);
 
-        if (!shouldPlay) {
-          this._paused = true;
-          this._switching = false;
-          // Dispatch CAN_PLAY to satisfy UI loading state
-          this.dispatch(AUDIO_EVENTS.CAN_PLAY, undefined);
-          return;
-        }
-
-        await invoke("play_audio", { url });
+        await invoke("play_audio", { url, paused: !shouldPlay });
 
         // 如果在等待 play_audio 期间已经切歌，放弃
         if (gen !== this._playGen) return;
 
         this._switching = false; // 新歌已就绪，允许 ENDED 检测
-        this._paused = false;
+        this._paused = !shouldPlay;
         this.dispatch(AUDIO_EVENTS.CAN_PLAY, undefined);
-        this.dispatch(AUDIO_EVENTS.PLAY, undefined);
-        this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
+
+        if (shouldPlay) {
+          this.dispatch(AUDIO_EVENTS.PLAY, undefined);
+          this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
+        }
 
       } catch (e) {
         if (gen !== this._playGen) return; // 切歌后的错误忽略

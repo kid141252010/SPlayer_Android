@@ -49,6 +49,10 @@ class LyricManager {
    * 预加载的歌词
    */
   private prefetchedLyric: { id: number | string; result: LyricFetchResult } | null = null;
+  /**
+   * 最近处理过的歌曲 ID，用于防止重复处理
+   */
+  private lastHandledSongId: number | string | null = null;
 
   constructor() { }
 
@@ -930,7 +934,13 @@ class LyricManager {
    * 处理歌词
    * @param song 歌曲对象
    */
-  public async handleLyric(song: SongType) {
+  public async handleLyric(song: SongType, force: boolean = false) {
+    if (!force && this.lastHandledSongId === song.id) {
+      console.log(`[LyricManager] [${song.id}] 歌词已在处理或已就绪，跳过重复请求`);
+      return;
+    }
+    this.lastHandledSongId = song.id;
+
     const statusStore = useStatusStore();
 
     // 标记当前歌词请求
