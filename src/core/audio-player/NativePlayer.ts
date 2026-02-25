@@ -38,7 +38,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   }
 
   public async init() {
-    // 监听 Rust 发送的音频结束事件，防止后台期间 setInterval 被挂起而丢失 ENDED
+    // 监听 Rust 发送的音频结束事件
     try {
       this._unlistenEnded = await listen("audioplayer://ended", () => {
         if (!this._switching) {
@@ -46,10 +46,27 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
           this._paused = true;
           this.stopTimer();
           this.dispatch(AUDIO_EVENTS.ENDED, undefined);
+          this.syncNativeState();
         }
       });
+
+      // 监听 Android 原生 MediaSession 事件
+      await listen("plugin:NativeMedia|play", () => this.resume());
+      await listen("plugin:NativeMedia|pause", () => this.pause());
+      await listen("plugin:NativeMedia|next", () => {
+        // 使用字符串直接分发，避开枚举带来的类型限制，
+        // 同时在外部（PlayerController）监听这些自定义事件。
+        this.dispatch("skip_next" as any, undefined);
+      });
+      await listen("plugin:NativeMedia|previous", () => {
+        this.dispatch("skip_previous" as any, undefined);
+      });
+      await listen("plugin:NativeMedia|seek", (event: any) => {
+        const pos = event.payload?.position || 0;
+        this.seek(pos / 1000); // 毫秒转秒
+      });
     } catch (e) {
-      console.error("[NativePlayer] failed to listen to ended event:", e);
+      console.error("[NativePlayer] failed to listen to events:", e);
     }
   }
 
@@ -127,6 +144,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       this._paused = true;
       this.stopTimer();
       this.dispatch(AUDIO_EVENTS.PAUSE, undefined);
+      this.syncNativeState();
     } catch (e) {
       console.error("[NativePlayer] pause failed:", e);
     }
@@ -140,6 +158,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       this.startTimer();
       this.dispatch(AUDIO_EVENTS.PLAY, undefined);
       this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
+      this.syncNativeState();
     } catch (e) {
       console.error("[NativePlayer] resume failed:", e);
     }
@@ -160,6 +179,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
         this._currentTime = time;
         this._ended = false;
         this.dispatch(AUDIO_EVENTS.TIME_UPDATE, undefined);
+        this.syncNativeState();
       })
       .catch(console.error);
   }
@@ -167,6 +187,10 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   public setVolume(volume: number): void {
     this._volume = volume;
     invoke("set_volume", { volume }).catch(console.error);
+  }
+
+  public preload(url: string): void {
+    invoke("preload_audio", { url }).catch(console.error);
   }
 
   public getVolume(): number {
@@ -205,6 +229,23 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     return 0;
   }
 
+  public setReplayGain(_gain: number): void { }
+  public setPitchShift(_semitones: number): void { }
+  public setFilterGain(_index: number, _value: number): void { }
+  public getFilterGains?(): number[] { return [] }
+  public setHighPassFilter?(_frequency: number, _rampTime?: number): void { }
+  public setHighPassQ?(_q: number): void { }
+  public setLowPassFilter?(_frequency: number, _rampTime?: number): void { }
+  public setLowPassQ?(_q: number): void { }
+  public getFrequencyData?(): Uint8Array { return new Uint8Array(0) }
+  public getLowFrequencyVolume?(): number { return 0 }
+  public rampVolumeTo?(value: number, _duration: number, _curve?: any): void {
+    this.setVolume(value);
+  }
+  public setSinkId(_deviceId: string): Promise<void> {
+    return Promise.resolve();
+  }
+
   // ========== Internal ==========
 
   /** 防止定时器 tick 并发执行（IPC 延迟可能超过 50ms） */
@@ -233,8 +274,14 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
             this._paused = true;
             this.stopTimer();
             this.dispatch(AUDIO_EVENTS.ENDED, undefined);
+            this.syncNativeState();
             return;
           }
+        }
+
+        // 每 1s 同步一次进度到原生 MediaSession
+        if (Math.floor(this._currentTime % 1) === 0) {
+          this.syncNativeState();
         }
       } catch (_e) {
         // ignore polling errors
@@ -272,6 +319,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
             if (gen !== this._playGen) return;
             if (meta) {
               this._metadata = meta;
+              this.syncNativeMetadata(meta);
               console.log("[NativePlayer] Metadata loaded:", meta);
             }
           } catch (e) {
@@ -286,7 +334,20 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
   }
 
   // Optional methods stub
-  public setSinkId(_deviceId: string): Promise<void> {
-    return Promise.resolve();
+  private syncNativeState() {
+    invoke("plugin:NativeMedia|updatePlaybackState", {
+      isPlaying: !this._paused,
+      position: Math.floor(this._currentTime * 1000),
+      duration: Math.floor(this._duration * 1000),
+    }).catch(() => { });
+  }
+
+  private syncNativeMetadata(meta: any) {
+    if (!meta) return;
+    invoke("plugin:NativeMedia|updateMetadata", {
+      title: meta.title || "Unknown",
+      artist: meta.artist || "Unknown",
+      album: meta.album || "Unknown",
+    }).catch(() => { });
   }
 }

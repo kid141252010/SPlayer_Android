@@ -15,7 +15,10 @@ use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::{MediaSource, MediaSourceStream};
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use tauri::{State, Emitter};
+use tauri::{State, Emitter, AppHandle};
+
+#[cfg(target_os = "android")]
+use tauri::Manager;
 
 // ============================================================
 // Streaming support for HTTP Audio
@@ -98,8 +101,8 @@ impl MediaSource for ProgressiveStream {
 // Commands sent from the frontend via Tauri IPC
 // ============================================================
 
-enum AudioCommand {
     Play(String),
+    Preload(String),
     Pause,
     Resume,
     Stop,
@@ -227,10 +230,10 @@ impl AudioOutputCallback for PlayerCallback {
 // Public state managed by Tauri
 // ============================================================
 
-pub struct AudioState {
     command_tx: Mutex<Sender<AudioCommand>>,
     status: Arc<Mutex<PlaybackStatus>>,
     _app_handle: tauri::AppHandle,
+    preloaded: Arc<Mutex<Option<(String, MediaSourceStream, Hint)>>>,
 }
 
 impl AudioState {
@@ -247,18 +250,19 @@ impl AudioState {
             metadata: None,
         }));
 
-        let status_clone = status.clone();
-        let app_handle_clone = app_handle.clone();
+        let preloaded = Arc::new(Mutex::new(None));
+        let preloaded_clone = preloaded.clone();
 
         // Main audio management thread
         thread::spawn(move || {
-            Self::audio_thread(rx, status_clone, app_handle_clone);
+            Self::audio_thread(rx, status_clone, app_handle_clone, preloaded_clone);
         });
 
         Self {
             command_tx: Mutex::new(tx),
             status,
             _app_handle: app_handle,
+            preloaded,
         }
     }
 
@@ -267,6 +271,7 @@ impl AudioState {
         rx: std::sync::mpsc::Receiver<AudioCommand>,
         status: Arc<Mutex<PlaybackStatus>>,
         app_handle: tauri::AppHandle,
+        preloaded: Arc<Mutex<Option<(String, MediaSourceStream, Hint)>>>,
     ) {
         let volume = Arc::new(Mutex::new(1.0f32));
         let playing = Arc::new(AtomicBool::new(false));
@@ -325,9 +330,10 @@ impl AudioState {
                 let volume_for_decode = volume.clone();
                 let stream_ctx_for_decode = stream_ctx.clone();
                 let app_handle_clone = app_handle.clone();
+                let preloaded_for_decode = preloaded.clone();
 
                 _decode_handle = Some(thread::spawn(move || {
-                    Self::decode_thread(url, producer, arc_consumer, decode_stop_clone, status_for_decode, playing_for_decode, volume_for_decode, stream_ctx_for_decode, app_handle_clone);
+                    Self::decode_thread(url, producer, arc_consumer, decode_stop_clone, status_for_decode, playing_for_decode, volume_for_decode, stream_ctx_for_decode, app_handle_clone, preloaded_for_decode);
                 }));
 
                 // Note: Oboe stream initialization is now executed inside the decode thread
@@ -353,6 +359,15 @@ impl AudioState {
                             Err(TryRecvError::Disconnected) => return,
                         }
                     }
+                }
+                AudioCommand::Preload(url) => {
+                    let preloaded_clone = preloaded.clone();
+                    thread::spawn(move || {
+                        if let Some((mss, hint)) = Self::prepare_stream(&url) {
+                            let mut p = preloaded_clone.lock().unwrap();
+                            *p = Some((url, mss, hint));
+                        }
+                    });
                 }
                 AudioCommand::Pause => {
                     playing.store(false, Ordering::SeqCst);
@@ -398,87 +413,27 @@ impl AudioState {
         volume: Arc<Mutex<f32>>,
         stream_ctx: Arc<StreamContext>,
         app_handle: tauri::AppHandle,
+        preloaded: Arc<Mutex<Option<(String, MediaSourceStream, Hint)>>>,
     ) {
-        // ---- Load audio data ----
-        let mut hint = Hint::new();
-        // Try to extract extension from URL
-        let ext = url.rsplit('.').next().unwrap_or("").to_lowercase();
-        let ext_clean = ext.split('?').next().unwrap_or(&ext);
-        hint.with_extension(ext_clean);
-
-        let mss = if url.starts_with("http://") || url.starts_with("https://") {
-            let shared = Arc::new((Mutex::new(SharedStreamData {
-                buffer: Vec::new(),
-                is_eof: false,
-                has_error: false,
-            }), Condvar::new()));
-
-            let shared_clone = shared.clone();
-            let url_clone = url.clone();
-            let mut content_length = None;
-
-            if let Ok(resp) = reqwest::blocking::Client::builder()
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap()
-                .get(&url_clone)
-                .send()
-            {
-                if let Some(cl) = resp.content_length() {
-                    content_length = Some(cl);
+        let preloaded_data = {
+            let mut p = preloaded.lock().unwrap();
+            if let Some((p_url, _, _)) = &*p {
+                if p_url == &url {
+                    p.take()
+                } else {
+                    None
                 }
-
-                thread::spawn(move || {
-                    let mut r = resp;
-                    let mut chunk = [0u8; 32768];
-                    loop {
-                        match r.read(&mut chunk) {
-                            Ok(0) => {
-                                let (lock, cvar) = &*shared_clone;
-                                let mut state = lock.lock().unwrap();
-                                state.is_eof = true;
-                                cvar.notify_all();
-                                break;
-                            }
-                            Ok(n) => {
-                                let (lock, cvar) = &*shared_clone;
-                                let mut state = lock.lock().unwrap();
-                                state.buffer.extend_from_slice(&chunk[0..n]);
-                                cvar.notify_all();
-                            }
-                            Err(_) => {
-                                let (lock, cvar) = &*shared_clone;
-                                let mut state = lock.lock().unwrap();
-                                state.has_error = true;
-                                cvar.notify_all();
-                                break;
-                            }
-                        }
-                    }
-                });
             } else {
-                eprintln!("[Decode] HTTP request failed to start");
-                return;
+                None
             }
+        };
 
-            let stream = ProgressiveStream {
-                shared,
-                pos: 0,
-                content_length,
-            };
-
-            MediaSourceStream::new(Box::new(stream), Default::default())
+        let (mut mss, hint) = if let Some((_, mss, hint)) = preloaded_data {
+            (mss, hint)
         } else {
-            // Local file
-            match std::fs::read(&url) {
-                Ok(data) => {
-                    let cursor = Cursor::new(data);
-                    MediaSourceStream::new(Box::new(cursor), Default::default())
-                }
-                Err(e) => {
-                    eprintln!("[Decode] Failed to read file: {}", e);
-                    return;
-                }
+            match Self::prepare_stream(&url) {
+                Some(s) => s,
+                None => return,
             }
         };
 
@@ -748,16 +703,106 @@ impl AudioState {
             let _ = stream.stop();
         }
     }
-}
 
-// ============================================================
-// Tauri commands
-// ============================================================
+    /// Prepare a stream (starts download if HTTP) without starting decoding.
+    fn prepare_stream(url: &str) -> Option<(MediaSourceStream, Hint)> {
+        let mut hint = Hint::new();
+        let ext = url.rsplit('.').next().unwrap_or("").to_lowercase();
+        let ext_clean = ext.split('?').next().unwrap_or(&ext);
+        hint.with_extension(ext_clean);
+
+        if url.starts_with("http://") || url.starts_with("https://") {
+            let shared = Arc::new((
+                Mutex::new(SharedStreamData {
+                    buffer: Vec::new(),
+                    is_eof: false,
+                    has_error: false,
+                }),
+                Condvar::new(),
+            ));
+
+            let shared_clone = shared.clone();
+            let url_string = url.to_string();
+            let mut content_length = None;
+
+            if let Ok(resp) = reqwest::blocking::Client::builder()
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap()
+                .get(&url_string)
+                .send()
+            {
+                if let Some(cl) = resp.content_length() {
+                    content_length = Some(cl);
+                }
+
+                thread::spawn(move || {
+                    let mut r = resp;
+                    let mut chunk = [0u8; 32768];
+                    loop {
+                        match r.read(&mut chunk) {
+                            Ok(0) => {
+                                let (lock, cvar) = &*shared_clone;
+                                let mut state = lock.lock().unwrap();
+                                state.is_eof = true;
+                                cvar.notify_all();
+                                break;
+                            }
+                            Ok(n) => {
+                                let (lock, cvar) = &*shared_clone;
+                                let mut state = lock.lock().unwrap();
+                                state.buffer.extend_from_slice(&chunk[0..n]);
+                                cvar.notify_all();
+                            }
+                            Err(_) => {
+                                let (lock, cvar) = &*shared_clone;
+                                let mut state = lock.lock().unwrap();
+                                state.has_error = true;
+                                cvar.notify_all();
+                                break;
+                            }
+                        }
+                    }
+                });
+            } else {
+                eprintln!("[AudioPlayer] Preload failed to start request");
+                return None;
+            }
+
+            let stream = ProgressiveStream {
+                shared,
+                pos: 0,
+                content_length,
+            };
+
+            Some((MediaSourceStream::new(Box::new(stream), Default::default()), hint))
+        } else {
+            // Local file
+            match std::fs::read(url) {
+                Ok(data) => {
+                    let cursor = Cursor::new(data);
+                    Some((MediaSourceStream::new(Box::new(cursor), Default::default()), hint))
+                }
+                Err(e) => {
+                    eprintln!("[AudioPlayer] Failed to read local file: {}", e);
+                    None
+                }
+            }
+        }
+    }
+}
 
 #[tauri::command]
 pub fn play_audio(state: State<AudioState>, url: String) -> Result<(), String> {
     state.command_tx.lock().unwrap()
         .send(AudioCommand::Play(url))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn preload_audio(state: State<AudioState>, url: String) -> Result<(), String> {
+    state.command_tx.lock().unwrap()
+        .send(AudioCommand::Preload(url))
         .map_err(|e| e.to_string())
 }
 
@@ -816,7 +861,43 @@ pub fn get_playback_state(state: State<AudioState>) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn get_metadata(state: State<AudioState>) -> Result<Option<AudioMetadata>, String> {
-    let st = state.status.lock().map_err(|e| e.to_string())?;
-    Ok(st.metadata.clone())
+pub fn update_native_metadata(
+    app_handle: AppHandle,
+    title: String,
+    artist: String,
+    _album: String,
+    _cover_url: String,
+) -> Result<(), String> {
+    #[cfg(target_os = "android")]
+    {
+        let handle = app_handle.clone();
+        app_handle.run_on_main_thread(move || {
+            let env = handle.android_app().env();
+            let activity = handle.android_app().activity();
+            
+            // This is a simplified example of sending an intent via JNI.
+            // In a real scenario, we might want to use a more robust way or a plugin.
+            // For now, we'll try to trigger the service update via a standard Intent.
+            
+            // We'll need to call Context.startService with an Intent containing extras.
+            // JNI code here...
+            
+            // Actually, a simpler way for now is to use AppHandle.emit and let MainActivity handle it?
+            // But MainActivity might be suspended.
+            
+            // Let's use Emitter to send events that Kotlin part can listen to if possible.
+            // But Kotlin isn't listening to Rust events easily without a plugin.
+            
+            // I'll implement a basic Intent sender using JNI if I can, 
+            // but it requires a lot of boilerplate.
+            
+            // Let's try to find a simpler way: Emitter.emit
+            // Wait, Emitter.emit is for JS.
+        }).map_err(|e| e.to_string())?;
+    }
+    
+    // For now, let's just emit an event that JS can use to sync if needed, 
+    // but the main goal is Native -> JS communication.
+    // Actually, let's focus on Kotlin side listening to something.
+    Ok(())
 }

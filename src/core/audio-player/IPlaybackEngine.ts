@@ -97,6 +97,12 @@ export interface IPlaybackEngine {
    */
   seek(time: number): void;
 
+  /**
+   * 预加载音频地址 (可选)
+   * @param url 音频地址
+   */
+  preload?(url: string): void;
+
   // ========== 状态属性 ==========
 
   /** 音频总时长（秒） */

@@ -73,6 +73,17 @@ export class AudioElementPlayer extends BaseAudioPlayer {
   }
 
   /**
+   * 预加载音频
+   * @param url 音频地址
+   */
+  public preload(url: string): void {
+    if (this.audioElement.src !== url) {
+      this.audioElement.src = url;
+      this.audioElement.load();
+    }
+  }
+
+  /**
    * 执行底层播放
    * @returns 播放 Promise
    */

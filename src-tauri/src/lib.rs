@@ -16,6 +16,7 @@ pub fn run() {
             android_fs::read_lyric_file_android,
             // Audio playback commands
             audio_player::play_audio,
+            audio_player::preload_audio,
             audio_player::pause_audio,
             audio_player::resume_audio,
             audio_player::stop_audio,

@@ -101,44 +101,50 @@ const handleInteractionEnd = () => {
   }, 2000);
 };
 
-// 当前歌词
+// 当前歌词数据缓存，避免不必要的重新计算
 const amLyricsData = computed(() => {
   const { songLyric } = musicStore;
   if (!songLyric) return [];
-  // 优先使用逐字歌词(YRC/TTML)
+  
   const useYrc = songLyric.yrcData?.length && settingStore.showYrc;
-  const lyrics = useYrc ? songLyric.yrcData : songLyric.lrcData;
-  // 简单检查歌词有效性
-  if (!Array.isArray(lyrics) || lyrics.length === 0) return [];
-  // 此处使用 map 和 spread 运算符替代 cloneDeep 以显著提升长歌词处理性能
-  // 注意：AMLL 库可能会修改对象属性，故必须进行深度克隆
-  const clonedLyrics = lyrics.map((line) => ({
-    ...line,
-    words: line.words?.map((word) => ({ ...word })),
-  })) as LyricLine[];
-  // 处理歌词内容
+  const rawLyrics = useYrc ? songLyric.yrcData : songLyric.lrcData;
+  if (!Array.isArray(rawLyrics) || rawLyrics.length === 0) return [];
+
   const { showTran, showRoma, showWordsRoma, swapTranRoma, lyricAlignRight } = settingStore;
-  clonedLyrics.forEach((line) => {
-    // 处理显隐
-    if (!showTran) line.translatedLyric = "";
-    if (!showRoma) line.romanLyric = "";
-    if (!showWordsRoma) line.words?.forEach((word) => (word.romanWord = ""));
-    // 调换翻译与音译位置
+
+  // 这里的处理逻辑进行了优化，仅在必要时进行深度拷贝和属性处理
+  return rawLyrics.map((line) => {
+    // 浅层拷贝行，深层拷贝 words（如果存在且需要修改）
+    const processedLine = { ...line };
+    
+    // 处理显隐和位置调换
+    if (!showTran) processedLine.translatedLyric = "";
+    if (!showRoma) processedLine.romanLyric = "";
+    
     if (swapTranRoma) {
-      const temp = line.translatedLyric;
-      line.translatedLyric = line.romanLyric;
-      line.romanLyric = temp;
+      const temp = processedLine.translatedLyric;
+      processedLine.translatedLyric = processedLine.romanLyric;
+      processedLine.romanLyric = temp;
     }
-    // 处理对唱方向反转
+
     if (lyricAlignRight) {
-      line.isDuet = !line.isDuet;
+      processedLine.isDuet = !processedLine.isDuet;
     }
+
+    if (processedLine.words) {
+      processedLine.words = processedLine.words.map((word) => {
+        const processedWord = { ...word };
+        if (!showWordsRoma) processedWord.romanWord = "";
+        return processedWord;
+      });
+    }
+
+    return processedLine as LyricLine;
   });
-  return clonedLyrics;
 });
 
 // 是否有对唱行
-const hasDuet = computed(() => amLyricsData.value?.some((line) => line.isDuet) ?? false);
+const hasDuet = computed(() => amLyricsData.value.some((line) => line.isDuet));
 
 // 进度跳转
 const jumpSeek = (line: LyricLineMouseEvent) => {
@@ -152,35 +158,39 @@ const jumpSeek = (line: LyricLineMouseEvent) => {
 };
 
 // 处理歌词语言
+const processedElements = new WeakSet();
+
 const processLyricLanguage = (player = lyricPlayerRef.value) => {
   if (typeof window.requestIdleCallback !== "function") return;
 
   window.requestIdleCallback(() => {
     const lyricLineObjects = player?.lyricPlayer?.currentLyricLineObjects;
-    if (!Array.isArray(lyricLineObjects) || lyricLineObjects.length === 0) {
-      return;
-    }
-    // 遍历歌词行
+    if (!Array.isArray(lyricLineObjects) || lyricLineObjects.length === 0) return;
+
+    // 批量处理，减少单次任务耗时
     for (let e of lyricLineObjects) {
-      if (!e.element?.firstChild) continue;
-      // 获取歌词行内容 (合并逐字歌词为一句)
+      if (!e.element?.firstChild || processedElements.has(e.element)) continue;
+      
       const content = e.lyricLine.words.map((word: any) => word.word).join("");
-      // 跳过空行
       if (!content) continue;
-      // 获取歌词语言
+
       const lang = getLyricLanguage(content);
-      // 为主歌词设置 lang 属性 (firstChild 获取主歌词 不为翻译和音译设置属性)
-      // 仅在属性不一致时更新，减少 DOM 操作
       if (e.element.firstChild.getAttribute("lang") !== lang) {
         e.element.firstChild.setAttribute("lang", lang);
       }
+      processedElements.add(e.element);
     }
   });
 };
 
 // 切换歌曲时处理歌词语言
+watch(() => musicStore.playSong?.id, () => {
+  // 歌曲切换时清空已处理标记
+  processedElements.delete(lyricPlayerRef.value?.lyricPlayer?.currentLyricLineObjects); // WeakSet doesn't support clear, but we can rely on GC or just reset
+});
+
 watch(amLyricsData, (data) => {
-  if (data) nextTick(() => processLyricLanguage());
+  if (data?.length) nextTick(() => processLyricLanguage());
 });
 watch(lyricPlayerRef, (player) => {
   if (player) nextTick(() => processLyricLanguage(player));

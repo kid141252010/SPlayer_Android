@@ -78,6 +78,16 @@ class AudioManager extends TypedEventTarget<AudioEventMap> implements IPlaybackE
       this.engine.addEventListener(eventType, handler);
     });
 
+    // 额外的自定义事件转发 (Native Media Controls)
+    const customEvents = ["skip_next", "skip_previous"];
+    customEvents.forEach((eventType) => {
+      const handler = () => {
+        this.dispatch(eventType as any, undefined);
+      };
+      handlers.set(eventType, handler);
+      this.engine.addEventListener(eventType, handler);
+    });
+
     this.cleanupListeners = () => {
       handlers.forEach((handler, eventType) => {
         this.engine.removeEventListener(eventType, handler);
@@ -317,6 +327,16 @@ class AudioManager extends TypedEventTarget<AudioEventMap> implements IPlaybackE
   public setVolume(value: number): void {
     this._masterVolume = value;
     this.engine.setVolume(value);
+  }
+
+  /**
+   * 预加载音频
+   * @param url 音频地址
+   */
+  public preload(url: string): void {
+    if (this.engine.preload) {
+      this.engine.preload(url);
+    }
   }
 
   /**

@@ -7,7 +7,7 @@ import type { AudioSourceType, QualityType, SongType } from "@/types/main";
 import type { RepeatModeType, ShuffleModeType } from "@/types/shared/play-mode";
 import { calculateLyricIndex } from "@/utils/calc";
 import { getCoverColor } from "@/utils/color";
-import { isElectron, isMac } from "@/utils/env";
+import { isElectron, isMac, isTauri } from "@/utils/env";
 import { getPlayerInfoObj, getPlaySongData } from "@/utils/format";
 import { handleSongQuality, shuffleArray, sleep } from "@/utils/helper";
 import lastfmScrobbler from "@/utils/lastfmScrobbler";
@@ -1004,7 +1004,14 @@ class PlayerController {
     }
 
     // 预载下一首
-    if (settingStore.useNextPrefetch) songManager.prefetchNextSong();
+    if (settingStore.useNextPrefetch) {
+      const audioManager = useAudioManager();
+      songManager.prefetchNextSong().then((source) => {
+        if (isTauri && source?.url) {
+          audioManager.preload(source.url);
+        }
+      });
+    }
 
     // Last.fm Scrobbler
     if (settingStore.lastfm.enabled && settingStore.isLastfmConfigured) {
@@ -1082,7 +1089,7 @@ class PlayerController {
       !statusStore.personalFmMode &&
       statusStore.playStatus &&
       !this.isTransitioning &&
-      isElectron;
+      (isElectron || isTauri);
 
     if (!shouldMonitor) {
       this.resetAutomixScheduling("IDLE");
@@ -1727,6 +1734,8 @@ class PlayerController {
     audioManager.addEventListener("pause", () => {
       statusStore.playStatus = false;
       this.resetAutomixScheduling("IDLE");
+      this.updateAutomixMonitoring();
+      this.cancelAutoCloseTimer();
       playerIpc.sendMediaPlayState("Paused");
       mediaSessionManager.updatePlaybackStatus(false);
       if (!isElectron) window.document.title = "SPlayer";
@@ -1736,6 +1745,17 @@ class PlayerController {
       playerIpc.sendTaskbarProgress(statusStore.progress);
       lastfmScrobbler.pause();
       console.log(`⏸️ [${musicStore.playSong?.id}] 歌曲暂停`);
+    });
+
+    // Android 原生控制 (来自 NativeMediaPlugin)
+    audioManager.addEventListener("skip_next" as any, () => {
+      console.log("⏭️ [Native] Skip Next");
+      this.nextOrPrev("next");
+    });
+
+    audioManager.addEventListener("skip_previous" as any, () => {
+      console.log("⏮️ [Native] Skip Previous");
+      this.nextOrPrev("prev");
     });
 
     audioManager.addEventListener("seeking", () => {
@@ -2618,6 +2638,18 @@ class PlayerController {
         }
       }
     }, 1000);
+  }
+
+  /**
+   * 取消自动关闭定时器
+   */
+  public cancelAutoCloseTimer() {
+    if (this.autoCloseInterval) {
+      clearInterval(this.autoCloseInterval);
+      this.autoCloseInterval = undefined;
+    }
+    const statusStore = useStatusStore();
+    statusStore.autoClose.enable = false;
   }
 
   /** 检查并执行自动关闭 */
