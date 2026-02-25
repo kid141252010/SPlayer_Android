@@ -26,10 +26,9 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
 
     @Command
     fun updateMetadata(invoke: Invoke) {
-        val data = invoke.data
-        val title = data.getString("title") ?: ""
-        val artist = data.getString("artist") ?: ""
-        val album = data.getString("album") ?: ""
+        val title = invoke.args.getString("title") ?: ""
+        val artist = invoke.args.getString("artist") ?: ""
+        val album = invoke.args.getString("album") ?: ""
         
         val intent = Intent(activity, MediaSessionService::class.java).apply {
             action = MediaSessionService.ACTION_UPDATE_METADATA
@@ -43,10 +42,9 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
 
     @Command
     fun updatePlaybackState(invoke: Invoke) {
-        val data = invoke.data
-        val isPlaying = data.getBoolean("isPlaying") ?: true
-        val position = data.getLong("position") ?: 0
-        val duration = data.getLong("duration") ?: 0
+        val isPlaying = invoke.args.getBoolean("isPlaying") ?: true
+        val position = invoke.args.getLong("position") ?: 0
+        val duration = invoke.args.getLong("duration") ?: 0
         
         val intent = Intent(activity, MediaSessionService::class.java).apply {
             action = MediaSessionService.ACTION_UPDATE_STATE
