@@ -230,6 +230,7 @@ impl AudioOutputCallback for PlayerCallback {
 // Public state managed by Tauri
 // ============================================================
 
+pub struct AudioState {
     command_tx: Mutex<Sender<AudioCommand>>,
     status: Arc<Mutex<PlaybackStatus>>,
     _app_handle: tauri::AppHandle,
