@@ -14,6 +14,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
+import app.tauri.plugin.JSObject
 
 class MediaSessionService : Service() {
     private var mediaSession: MediaSessionCompat? = null

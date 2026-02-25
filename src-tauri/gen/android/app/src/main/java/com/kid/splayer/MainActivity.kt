@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : TauriActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        registerPlugin(NativeMediaPlugin::class.java)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         
