@@ -164,6 +164,8 @@ class PlayerController {
   } | null = null;
   /** 当前环节的歌曲 ID (用于校验 ended 事件) */
   private sessionSongId: number | null = null;
+  /** 当前环节的 Token (用于校验 ended 事件) */
+  private sessionToken: number = 0;
   /** 速率重置定时器 */
   private rateResetTimer: ReturnType<typeof setTimeout> | undefined;
   /** 速率渐变动画帧 */
@@ -547,7 +549,6 @@ class PlayerController {
   ) {
     const musicStore = useMusicStore();
     const statusStore = useStatusStore();
-    const lyricManager = useLyricManager();
 
     musicStore.playSong = song;
     statusStore.currentTime = startSeek;
@@ -594,9 +595,7 @@ class PlayerController {
       }
     }
 
-    // 获取歌词
-    lyricManager.handleLyric(song);
-    console.log(`🎧 [${song.id}] 最终播放信息:`, audioSource);
+    // console.log(`🎧 [${song.id}] 最终播放信息:`, audioSource);
     // 更新音质和解锁状态
     statusStore.songQuality = audioSource.quality;
     statusStore.audioSource = audioSource.source;
@@ -657,12 +656,13 @@ class PlayerController {
     }
 
     try {
+      // 标记开始加载 (必须在 stop 之前，以防止 ended 事件触发异常)
+      statusStore.playLoading = true;
+
       // 立即停止当前播放 (除非是 Crossfade)
       if (!options.crossfade) {
         audioManager.stop();
       }
-
-      statusStore.playLoading = true;
 
       // --> 立即更新基础UI状态，让界面第一时间响应 <--
       const musicStore = useMusicStore();
@@ -1673,6 +1673,7 @@ class PlayerController {
     audioManager.addEventListener("playing", () => {
       // 更新当前环节的歌曲 ID，标识该歌曲已真正开始播放
       this.sessionSongId = musicStore.playSong?.id || null;
+      this.sessionToken = this.currentRequestToken;
       if (statusStore.playLoading) statusStore.playLoading = false;
     });
 
@@ -1756,6 +1757,12 @@ class PlayerController {
         console.log("⏹️ [Ended Event Ignored] Transitioning or Loading new song");
         return;
       }
+      // [核心修复] 额外校验 Token
+      if (this.currentRequestToken !== this.sessionToken) {
+        console.warn(`⏹️ [Ended Event Ignored] Token mismatch: expected ${this.sessionToken}, current ${this.currentRequestToken}`);
+        return;
+      }
+
       this.resetAutomixScheduling("IDLE");
       console.log(`⏹️ [${musicStore.playSong?.id}] 歌曲结束`);
       lastfmScrobbler.stop();
