@@ -83,10 +83,18 @@ jobs:
           fi
 
       - name: Decode Keystore
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > src-tauri/splayer.keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Diagnostic - List files
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "src-tauri contents:"
+          ls -F src-tauri/
+          if [ -d "src-tauri/gen/android" ]; then
+            echo "src-tauri/gen/android contents:"
+            ls -F src-tauri/gen/android/
+          fi
 
       - name: Initialize Android Project
         run: pnpm tauri android init
@@ -96,7 +104,7 @@ jobs:
         run: pnpm tauri android build --target ${{ matrix.tauri_target }} --apk
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ANDROID_KEYSTORE_FILE: ../splayer.keystore
+          ANDROID_KEYSTORE_FILE: ../../splayer.keystore
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}

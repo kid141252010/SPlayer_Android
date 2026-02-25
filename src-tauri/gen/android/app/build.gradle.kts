@@ -47,10 +47,12 @@ android {
                     keyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
                     keyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
                 } else {
-                    println("Warning: Keystore file not found at $sFile, release build will be unsigned.")
+                    println("!! WARNING !!: Keystore file not found at: ${file.absolutePath}")
+                    println("Release build will be UNSIGNED.")
                 }
             } else {
-                println("Warning: No keystore file configured, release build will be unsigned.")
+                println("!! WARNING !!: ANDROID_KEYSTORE_FILE environment variable is empty or null.")
+                println("Release build will be UNSIGNED.")
             }
         }
     }
