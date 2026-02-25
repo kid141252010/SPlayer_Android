@@ -4,10 +4,25 @@ import android.app.Activity
 import android.content.Intent
 import android.webkit.WebView
 import app.tauri.annotation.Command
+import app.tauri.annotation.InvokeArg
 import app.tauri.annotation.TauriPlugin
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
 import app.tauri.plugin.Invoke
+
+@InvokeArg
+class MetadataArgs {
+    var title: String? = null
+    var artist: String? = null
+    var album: String? = null
+}
+
+@InvokeArg
+class PlaybackStateArgs {
+    var isPlaying: Boolean = true
+    var position: Long = 0
+    var duration: Long = 0
+}
 
 @TauriPlugin
 class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
@@ -26,9 +41,10 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
 
     @Command
     fun updateMetadata(invoke: Invoke) {
-        val title = invoke.args.getString("title") ?: ""
-        val artist = invoke.args.getString("artist") ?: ""
-        val album = invoke.args.getString("album") ?: ""
+        val args = invoke.parseArgs(MetadataArgs::class.java)
+        val title = args.title ?: ""
+        val artist = args.artist ?: ""
+        val album = args.album ?: ""
         
         val intent = Intent(activity, MediaSessionService::class.java).apply {
             action = MediaSessionService.ACTION_UPDATE_METADATA
@@ -42,9 +58,10 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
 
     @Command
     fun updatePlaybackState(invoke: Invoke) {
-        val isPlaying = invoke.args.getBoolean("isPlaying") ?: true
-        val position = invoke.args.getLong("position") ?: 0
-        val duration = invoke.args.getLong("duration") ?: 0
+        val args = invoke.parseArgs(PlaybackStateArgs::class.java)
+        val isPlaying = args.isPlaying
+        val position = args.position
+        val duration = args.duration
         
         val intent = Intent(activity, MediaSessionService::class.java).apply {
             action = MediaSessionService.ACTION_UPDATE_STATE
