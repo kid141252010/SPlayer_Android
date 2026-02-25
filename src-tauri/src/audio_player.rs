@@ -100,7 +100,7 @@ impl MediaSource for ProgressiveStream {
 // ============================================================
 // Commands sent from the frontend via Tauri IPC
 // ============================================================
-
+pub enum AudioCommand {
     Play(String),
     Preload(String),
     Pause,
