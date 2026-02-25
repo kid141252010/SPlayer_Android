@@ -25,7 +25,7 @@ class MainActivity : TauriActivity() {
         super.onCreate(savedInstanceState)
         
         // 注册插件
-        registerPlugin(NativeMediaPlugin(this))
+        pluginManager.register(NativeMediaPlugin(this))
         
         checkNotificationPermission()
     }
