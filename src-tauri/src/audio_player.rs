@@ -15,10 +15,7 @@ use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::{MediaSource, MediaSourceStream};
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use tauri::{State, Emitter, AppHandle};
-
-#[cfg(target_os = "android")]
-use tauri::Manager;
+use tauri::{State, Emitter, AppHandle, Manager};
 
 // ============================================================
 // Streaming support for HTTP Audio
@@ -253,6 +250,8 @@ impl AudioState {
 
         let preloaded = Arc::new(Mutex::new(None));
         let preloaded_clone = preloaded.clone();
+        let status_clone = status.clone();
+        let app_handle_clone = app_handle.clone();
 
         // Main audio management thread
         thread::spawn(move || {
@@ -429,7 +428,7 @@ impl AudioState {
             }
         };
 
-        let (mut mss, hint) = if let Some((_, mss, hint)) = preloaded_data {
+        let (mss, hint) = if let Some((_, mss, hint)) = preloaded_data {
             (mss, hint)
         } else {
             match Self::prepare_stream(&url) {
@@ -862,6 +861,12 @@ pub fn get_playback_state(state: State<AudioState>) -> Result<bool, String> {
 }
 
 #[tauri::command]
+pub fn get_metadata(state: State<AudioState>) -> Result<Option<AudioMetadata>, String> {
+    let st = state.status.lock().map_err(|e| e.to_string())?;
+    Ok(st.metadata.clone())
+}
+
+#[tauri::command]
 pub fn update_native_metadata(
     app_handle: AppHandle,
     title: String,
@@ -871,17 +876,13 @@ pub fn update_native_metadata(
 ) -> Result<(), String> {
     #[cfg(target_os = "android")]
     {
-        let handle = app_handle.clone();
-        app_handle.run_on_main_thread(move || {
-            let env = handle.android_app().env();
-            let activity = handle.android_app().activity();
+        let _handle = app_handle.clone();
+        let _ = app_handle.run_on_main_thread(move || {
+            // let env = _handle.android_app().env();
+            // let activity = _handle.android_app().activity();
             
-            // This is a simplified example of sending an intent via JNI.
-            // In a real scenario, we might want to use a more robust way or a plugin.
-            // For now, we'll try to trigger the service update via a standard Intent.
-            
-            // We'll need to call Context.startService with an Intent containing extras.
-            // JNI code here...
+            // TODO: Implement JNI call to start MediaSessionService or send Intent
+        });
             
             // Actually, a simpler way for now is to use AppHandle.emit and let MainActivity handle it?
             // But MainActivity might be suspended.
