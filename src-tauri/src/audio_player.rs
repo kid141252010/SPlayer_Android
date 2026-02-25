@@ -868,38 +868,13 @@ pub fn get_metadata(state: State<AudioState>) -> Result<Option<AudioMetadata>, S
 
 #[tauri::command]
 pub fn update_native_metadata(
-    app_handle: AppHandle,
-    title: String,
-    artist: String,
+    _app_handle: AppHandle,
+    _title: String,
+    _artist: String,
     _album: String,
     _cover_url: String,
 ) -> Result<(), String> {
-    #[cfg(target_os = "android")]
-    {
-        let _handle = app_handle.clone();
-        let _ = app_handle.run_on_main_thread(move || {
-            // let env = _handle.android_app().env();
-            // let activity = _handle.android_app().activity();
-            
-            // TODO: Implement JNI call to start MediaSessionService or send Intent
-        });
-            
-            // Actually, a simpler way for now is to use AppHandle.emit and let MainActivity handle it?
-            // But MainActivity might be suspended.
-            
-            // Let's use Emitter to send events that Kotlin part can listen to if possible.
-            // But Kotlin isn't listening to Rust events easily without a plugin.
-            
-            // I'll implement a basic Intent sender using JNI if I can, 
-            // but it requires a lot of boilerplate.
-            
-            // Let's try to find a simpler way: Emitter.emit
-            // Wait, Emitter.emit is for JS.
-        }).map_err(|e| e.to_string())?;
-    }
-    
-    // For now, let's just emit an event that JS can use to sync if needed, 
-    // but the main goal is Native -> JS communication.
-    // Actually, let's focus on Kotlin side listening to something.
+    // Note: Native metadata updates are currently handled via JS IPC to NativeMediaPlugin.kt
+    // This Rust command is a placeholder for future direct JNI integration if needed.
     Ok(())
 }
