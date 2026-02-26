@@ -49,7 +49,7 @@ class MainActivity : TauriActivity() {
     }
 
     private fun startPlaybackService() {
-        val serviceIntent = Intent(this, MediaSessionService::class.java)
+        val serviceIntent = Intent(this, SPlayerMediaService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 

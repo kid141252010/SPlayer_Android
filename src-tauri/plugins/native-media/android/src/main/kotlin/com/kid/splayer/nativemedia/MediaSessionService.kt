@@ -4,9 +4,11 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -14,12 +16,13 @@ import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.media.app.NotificationCompat.MediaStyle
 import app.tauri.plugin.JSObject
-import androidx.media.session.MediaSessionService
 
-class MediaSessionService : MediaSessionService() {
+class SPlayerMediaService : Service() {
     private var mediaSession: MediaSessionCompat? = null
     private val channelId = "splayer_playback"
     private val notificationId = 101
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -68,10 +71,6 @@ class MediaSessionService : MediaSessionService() {
                 .build()
             setPlaybackState(state)
         }
-    }
-
-    override fun onGetSession(controllerInfo: android.media.session.MediaSession.ControllerInfo): MediaSessionCompat? {
-        return mediaSession
     }
 
     private fun createNotificationChannel() {
