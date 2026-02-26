@@ -2,6 +2,7 @@ package com.kid.splayer
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import android.webkit.WebView
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
@@ -28,9 +29,11 @@ class PlaybackStateArgs {
 @TauriPlugin
 class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
     companion object {
+        private const val TAG = "NativeMediaPlugin"
         private var instance: NativeMediaPlugin? = null
         
         fun emitEvent(eventName: String, data: JSObject) {
+            Log.d(TAG, "emitEvent: $eventName")
             instance?.trigger(eventName, data)
         }
     }
@@ -38,10 +41,12 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
     override fun load(webView: WebView) {
         super.load(webView)
         instance = this
+        Log.d(TAG, "Plugin loaded")
     }
 
     @Command
     fun updateMetadata(invoke: Invoke) {
+        Log.d(TAG, "updateMetadata called")
         val args = invoke.parseArgs(MetadataArgs::class.java)
         val title = args.title ?: ""
         val artist = args.artist ?: ""
@@ -67,6 +72,7 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
 
     @Command
     fun updatePlaybackState(invoke: Invoke) {
+        Log.d(TAG, "updatePlaybackState called")
         val args = invoke.parseArgs(PlaybackStateArgs::class.java)
         val isPlaying = args.isPlaying
         val position = args.position

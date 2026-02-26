@@ -16,12 +16,17 @@ import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.media.app.NotificationCompat.MediaStyle
 import app.tauri.plugin.JSObject
 
 class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
+    companion object {
+        private const val TAG = "SPlayerMediaService"
+    }
+    
     private var mediaSession: MediaSessionCompat? = null
     private val channelId = "splayer_playback"
     private val notificationId = 101
@@ -32,12 +37,14 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "onCreate called")
         createNotificationChannel()
         
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         requestAudioFocus()
-
+        
         mediaSession = MediaSessionCompat(this, "SPlayerSession").apply {
+            Log.d(TAG, "Setting MediaSession active")
             isActive = true
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() {
@@ -110,9 +117,11 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand called with action: ${intent?.action}")
         // 立即启动前台服务，防止系统在 5-10 秒后杀掉服务 (Android 12+ 限制)
         val initialNotification = createNotification("SPlayer", "Ready to play")
         startForeground(notificationId, initialNotification)
+        Log.d(TAG, "Started foreground with notification")
 
         if (intent == null) return START_STICKY
 
