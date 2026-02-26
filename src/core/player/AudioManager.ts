@@ -46,7 +46,9 @@ class AudioManager extends TypedEventTarget<AudioEventMap> implements IPlaybackE
     // Tauri (Android): 使用 NativePlayer (Oboe/OpenSL ES 原生音频)
     // Web: 使用 AudioElementPlayer (Web Audio API)
     this.engine = isTauri ? new NativePlayer() : new AudioElementPlayer();
-    console.log(`[AudioManager] 使用引擎: ${isTauri ? 'NativePlayer (Oboe)' : 'AudioElementPlayer (Web Audio)'}`);
+    console.log(
+      `[AudioManager] 使用引擎: ${isTauri ? "NativePlayer (Oboe)" : "AudioElementPlayer (Web Audio)"}`,
+    );
 
     this.capabilities = this.engine.capabilities;
     this.bindEngineEvents();

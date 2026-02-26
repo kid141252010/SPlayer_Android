@@ -184,7 +184,11 @@ export const useInit = () => {
 
       // App 重新进入前台时（visibilitychange），重新申请 Wake Lock
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && statusStore.showFullPlayer && statusStore.playStatus) {
+        if (
+          document.visibilityState === "visible" &&
+          statusStore.showFullPlayer &&
+          statusStore.playStatus
+        ) {
           requestWakeLock();
         }
       });

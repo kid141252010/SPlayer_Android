@@ -18,7 +18,6 @@
     }"
     class="set-item"
   >
-
     <div v-for="item in 2" :key="item" :class="['lrc-item', { on: item === 2 }]">
       <n-text>我是一句歌词</n-text>
       <template v-if="settingStore.swapTranRoma">

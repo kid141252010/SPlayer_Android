@@ -54,7 +54,7 @@ class LyricManager {
    */
   private lastHandledSongId: number | string | null = null;
 
-  constructor() { }
+  constructor() {}
 
   /**
    * 重置当前歌曲的歌词数据
@@ -459,7 +459,7 @@ class LyricManager {
         const result = await invoke<string>("read_lyric_file_android", { uri: cleanPath });
         lyric = result;
         // 尝试推断格式
-        const ext = cleanPath.split('.').pop()?.toLowerCase();
+        const ext = cleanPath.split(".").pop()?.toLowerCase();
         format = ext === "ttml" ? "ttml" : ext === "yrc" ? "yrc" : "lrc";
       }
 
@@ -583,12 +583,13 @@ class LyricManager {
       const spanRegex = /<span[^>]+xml:lang="([^" ]+)"[^>]*>[\s\S]*?<\/span>/g;
 
       // 额外处理：如果开启了屏蔽繁体翻译，不论主语言是什么、不论属性顺序，一律清洗掉
-      const filteredTTML = (major_lang && settingStore.shieldTraditionalChineseTranslation)
-        ? ttml_text.replace(
-          /<translation((?:[^>]*\btype="replacement"[^>]*\bxml:lang="zh-Hant"|[^>]*\bxml:lang="zh-Hant"[^>]*\btype="replacement")[^>]*)>[\s\S]*?<\/translation>/g,
-          ""
-        )
-        : ttml_text;
+      const filteredTTML =
+        major_lang && settingStore.shieldTraditionalChineseTranslation
+          ? ttml_text.replace(
+              /<translation((?:[^>]*\btype="replacement"[^>]*\bxml:lang="zh-Hant"|[^>]*\bxml:lang="zh-Hant"[^>]*\btype="replacement")[^>]*)>[\s\S]*?<\/translation>/g,
+              "",
+            )
+          : ttml_text;
 
       return filteredTTML.replace(translationRegex, replacer).replace(spanRegex, replacer);
     };
@@ -622,11 +623,7 @@ class LyricManager {
       let ttml = "";
 
       if (isElectron) {
-        const result = await window.electron.ipcRenderer.invoke(
-          "read-local-lyric",
-          lyricDirs,
-          id,
-        );
+        const result = await window.electron.ipcRenderer.invoke("read-local-lyric", lyricDirs, id);
         lrc = result.lrc;
         ttml = result.ttml;
       } else if (isTauri) {
@@ -637,8 +634,8 @@ class LyricManager {
           try {
             const files = await invoke<LyricFile[]>("read_lyric_dir_android", { uri: dirUri });
             // 查找匹配 id.lrc 或 id.ttml 的文件
-            const lrcFile = files.find(f => f.name === `${id}.lrc`);
-            const ttmlFile = files.find(f => f.name === `${id}.ttml`);
+            const lrcFile = files.find((f) => f.name === `${id}.lrc`);
+            const ttmlFile = files.find((f) => f.name === `${id}.ttml`);
 
             if (lrcFile) {
               lrc = await invoke<string>("read_lyric_file_android", { uri: lrcFile.path });
@@ -783,14 +780,16 @@ class LyricManager {
       // 此处cloneDeep比较耗时，改为手动浅拷贝数组和对象以提升性能
       // AMLL 库会修改传入对象，故必须克隆
       const newLyricData: SongLyric = {
-        lrcData: lyricData.lrcData?.map((line) => ({
-          ...line,
-          words: line.words?.map((word) => ({ ...word })),
-        })) || [],
-        yrcData: lyricData.yrcData?.map((line) => ({
-          ...line,
-          words: line.words?.map((word) => ({ ...word })),
-        })) || [],
+        lrcData:
+          lyricData.lrcData?.map((line) => ({
+            ...line,
+            words: line.words?.map((word) => ({ ...word })),
+          })) || [],
+        yrcData:
+          lyricData.yrcData?.map((line) => ({
+            ...line,
+            words: line.words?.map((word) => ({ ...word })),
+          })) || [],
       };
 
       const convertLines = (lines: LyricLine[] | undefined) => {
@@ -886,9 +885,9 @@ class LyricManager {
     // 针对冗余繁体翻译的二次过滤 (在 applyChineseVariant 之后执行更准确，但这里先处理基础逻辑)
     if (settingStore.shieldTraditionalChineseTranslation) {
       const filterRedundant = (lines: LyricLine[]) => {
-        lines.forEach(line => {
+        lines.forEach((line) => {
           if (line.translatedLyric) {
-            const mainText = line.words?.map(w => w.word).join("") || "";
+            const mainText = line.words?.map((w) => w.word).join("") || "";
             // 如果翻译和原文完全一致（或者是原文的繁体/简体变体，由于后续会自动转换，这里只需判断是否一致）
             if (line.translatedLyric.trim() === mainText.trim()) {
               line.translatedLyric = "";
@@ -1102,7 +1101,7 @@ class LyricManager {
     const targetSuffixTtml = `${song.id}.ttml`.toLowerCase();
 
     // 🌟 关键：判断是否为安卓，不再判断 content://
-    const isAndroid = navigator.userAgent.toLowerCase().includes('android');
+    const isAndroid = navigator.userAgent.toLowerCase().includes("android");
 
     for (const dir of localLyricPath) {
       if (lrcContent && ttmlContent) break;

@@ -64,14 +64,17 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       });
 
       // 监听元数据事件 (取代轮询)
-      await listen<{ duration: number; title: string; artist: string; album: string }>("audioplayer://metadata", (event) => {
-        const meta = event.payload;
-        this._duration = meta.duration;
-        this._metadata = meta;
-        this.dispatch(AUDIO_EVENTS.DURATION_CHANGE, undefined);
-        this.syncNativeMetadata(meta);
-        console.log("[NativePlayer] Metadata Event received:", meta);
-      });
+      await listen<{ duration: number; title: string; artist: string; album: string }>(
+        "audioplayer://metadata",
+        (event) => {
+          const meta = event.payload;
+          this._duration = meta.duration;
+          this._metadata = meta;
+          this.dispatch(AUDIO_EVENTS.DURATION_CHANGE, undefined);
+          this.syncNativeMetadata(meta);
+          console.log("[NativePlayer] Metadata Event received:", meta);
+        },
+      );
 
       // 监听 Android 原生 MediaSession 事件
       await listen("plugin:NativeMedia|play", () => this.resume());
@@ -133,7 +136,6 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
           this.dispatch(AUDIO_EVENTS.PLAY, undefined);
           this.dispatch(AUDIO_EVENTS.PLAYING, undefined);
         }
-
       } catch (e) {
         if (gen !== this._playGen) return; // 切歌后的错误忽略
         console.error("[NativePlayer] play failed:", e);
@@ -231,16 +233,22 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
     return 0;
   }
 
-  public setReplayGain(_gain: number): void { }
-  public setPitchShift(_semitones: number): void { }
-  public setFilterGain(_index: number, _value: number): void { }
-  public getFilterGains?(): number[] { return [] }
-  public setHighPassFilter?(_frequency: number, _rampTime?: number): void { }
-  public setHighPassQ?(_q: number): void { }
-  public setLowPassFilter?(_frequency: number, _rampTime?: number): void { }
-  public setLowPassQ?(_q: number): void { }
-  public getFrequencyData?(): Uint8Array { return new Uint8Array(0) }
-  public getLowFrequencyVolume?(): number { return 0 }
+  public setReplayGain(_gain: number): void {}
+  public setPitchShift(_semitones: number): void {}
+  public setFilterGain(_index: number, _value: number): void {}
+  public getFilterGains?(): number[] {
+    return [];
+  }
+  public setHighPassFilter?(_frequency: number, _rampTime?: number): void {}
+  public setHighPassQ?(_q: number): void {}
+  public setLowPassFilter?(_frequency: number, _rampTime?: number): void {}
+  public setLowPassQ?(_q: number): void {}
+  public getFrequencyData?(): Uint8Array {
+    return new Uint8Array(0);
+  }
+  public getLowFrequencyVolume?(): number {
+    return 0;
+  }
   public rampVolumeTo?(value: number, _duration: number, _curve?: any): void {
     this.setVolume(value);
   }
@@ -256,7 +264,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       isPlaying: !this._paused,
       position: Math.floor(this._currentTime * 1000),
       duration: Math.floor(this._duration * 1000),
-    }).catch(() => { });
+    }).catch(() => {});
   }
 
   private syncNativeMetadata(meta: any) {
@@ -265,6 +273,6 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       title: meta.title || "Unknown",
       artist: meta.artist || "Unknown",
       album: meta.album || "Unknown",
-    }).catch(() => { });
+    }).catch(() => {});
   }
 }

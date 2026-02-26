@@ -55,7 +55,7 @@ export const useMusicStore = defineStore("music", {
     songCover: (state) => state.playSong.cover,
     isHasLrc: (state) => state.songLyric.lrcData.length > 0,
     isHasYrc: (state) => state.songLyric.yrcData.length > 0,
-    
+
     /**
      * 🌟 关键修复：确保私人 FM 歌曲永远不为 null
      * 这样组件里的 musicStore.personalFMSong.album 就不会报“可能为 null”了
@@ -68,17 +68,19 @@ export const useMusicStore = defineStore("music", {
      * 获取指定尺寸的封面
      * 🌟 修复：使用了 size 参数，解决“declared but never read”报错
      */
-    getSongCover: (state) => (size: string = "m") => {
-      let cover = state.playSong.cover;
-      if (!cover || cover.includes("?asset")) return cover;
-      
-      // 根据 size 参数进行简单的处理（如果需要网易云图片压缩可以加在这里）
-      const suffix = size === 's' ? '120' : size === 'm' ? '300' : '500';
-      if (cover.includes("music.126.net")) {
-        return `${cover}?param=${suffix}y${suffix}`;
-      }
-      return cover;
-    },
+    getSongCover:
+      (state) =>
+      (size: string = "m") => {
+        let cover = state.playSong.cover;
+        if (!cover || cover.includes("?asset")) return cover;
+
+        // 根据 size 参数进行简单的处理（如果需要网易云图片压缩可以加在这里）
+        const suffix = size === "s" ? "120" : size === "m" ? "300" : "500";
+        if (cover.includes("music.126.net")) {
+          return `${cover}?param=${suffix}y${suffix}`;
+        }
+        return cover;
+      },
   },
 
   actions: {
@@ -88,7 +90,7 @@ export const useMusicStore = defineStore("music", {
       const nav = navigator as any;
       if (nav && nav.mediaSession) {
         const artistName = Array.isArray(song.artists)
-          ? song.artists.map((a: any) => (typeof a === 'string' ? a : a.name)).join("/")
+          ? song.artists.map((a: any) => (typeof a === "string" ? a : a.name)).join("/")
           : String(song.artists || "未知歌手");
 
         if ((window as any).MediaMetadata) {
@@ -96,9 +98,7 @@ export const useMusicStore = defineStore("music", {
             title: song.name,
             artist: artistName,
             album: song.album || "SPlayer",
-            artwork: [
-              { src: song.cover, sizes: "512x512", type: "image/png" },
-            ],
+            artwork: [{ src: song.cover, sizes: "512x512", type: "image/png" }],
           });
         }
         this.initMediaHandlers();
@@ -121,10 +121,10 @@ export const useMusicStore = defineStore("music", {
       if (!nav || !nav.mediaSession) return;
 
       const handlers = [
-        ['play', '.icon-play, .btn-play'],
-        ['pause', '.icon-pause, .btn-pause'],
-        ['previoustrack', '.icon-prev, .btn-prev'],
-        ['nexttrack', '.icon-next, .btn-next'],
+        ["play", ".icon-play, .btn-play"],
+        ["pause", ".icon-pause, .btn-pause"],
+        ["previoustrack", ".icon-prev, .btn-prev"],
+        ["nexttrack", ".icon-next, .btn-next"],
       ];
 
       handlers.forEach(([action, selector]) => {

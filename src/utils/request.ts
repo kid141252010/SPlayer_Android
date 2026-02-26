@@ -10,8 +10,8 @@ const baseURL: string = String(
   isDev && !import.meta.env["VITE_API_BASE_URL"]
     ? "/api/netease"
     : import.meta.env["VITE_API_BASE_URL"] ||
-    import.meta.env["VITE_API_URL"] ||
-    "https://api.music.1412520.xyz",
+        import.meta.env["VITE_API_URL"] ||
+        "https://api.music.1412520.xyz",
 );
 
 // 基础配置

@@ -511,12 +511,7 @@ class PlayerController {
     const analysisKey = song.path || this.fileUrlToPath(safeAudioSource.url);
     this.currentAnalysisKey = analysisKey;
     const analysisMode = options?.analysis ?? "full";
-    if (
-      analysisMode !== "none" &&
-      isElectron &&
-      settingStore.enableAutomix &&
-      analysisKey
-    ) {
+    if (analysisMode !== "none" && isElectron && settingStore.enableAutomix && analysisKey) {
       try {
         const channel = analysisMode === "head" ? "analyze-audio-head" : "analyze-audio";
         const raw = await window.electron.ipcRenderer.invoke(channel, analysisKey, {
@@ -908,9 +903,9 @@ class PlayerController {
         const onSwitch = crossfadeOptions.onSwitch;
         const wrappedOnSwitch = shouldDeferStateSync
           ? () => {
-            onSwitch?.();
-            updateSeekState();
-          }
+              onSwitch?.();
+              updateSeekState();
+            }
           : onSwitch;
         await audioManager.crossfadeTo(url, {
           duration: crossfadeOptions.duration,
@@ -1780,7 +1775,9 @@ class PlayerController {
       // [核心修复] 校验环节 ID
       // 如果结束的不是当前正在播放的那首歌（说明是上一首由于切歌被 stop 延迟发出的 ended 事件），则直接忽略
       if (this.sessionSongId !== currentId) {
-        console.warn(`⏹️ [Ended Event Ignored] Session mismatch: expected ${this.sessionSongId}, current ${currentId}`);
+        console.warn(
+          `⏹️ [Ended Event Ignored] Session mismatch: expected ${this.sessionSongId}, current ${currentId}`,
+        );
         return;
       }
 
@@ -1791,7 +1788,9 @@ class PlayerController {
       }
       // [核心修复] 额外校验 Token
       if (this.currentRequestToken !== this.sessionToken) {
-        console.warn(`⏹️ [Ended Event Ignored] Token mismatch: expected ${this.sessionToken}, current ${this.currentRequestToken}`);
+        console.warn(
+          `⏹️ [Ended Event Ignored] Token mismatch: expected ${this.sessionToken}, current ${this.currentRequestToken}`,
+        );
         return;
       }
 
@@ -1893,7 +1892,7 @@ class PlayerController {
                 this.hasPreloadedNext = true;
               }
             })
-            .catch(() => { });
+            .catch(() => {});
         }
       }
     }, 50);

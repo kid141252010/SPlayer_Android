@@ -160,9 +160,9 @@ export const renderToolbar = ({ nodes }: ImageRenderToolbarProps) => {
  */
 export const amllDbServers = [
   {
-    label: "【默认】AMLL TTML DB 镜像站 (gbclstudio)",
+    label: "【默认】AMLL TTML DB 镜像站 (bikonoo)",
     description: "社区提供的镜像源",
-    value: "https://amll-ttml-db.gbclstudio.cn/ncm-lyrics/%s.ttml",
+    value: "https://amlldb.bikonoo.com/ncm-lyrics/%s.ttml",
   },
 ] as const;
 
@@ -170,4 +170,4 @@ export const amllDbServers = [
  * 默认 AMLL TTML DB Server
  * @returns 默认 AMLL TTML DB Server
  */
-export const defaultAMLLDbServer = "https://amll-ttml-db.gbclstudio.cn/ncm-lyrics/%s.ttml";
+export const defaultAMLLDbServer = "https://amlldb.bikonoo.com/ncm-lyrics/%s.ttml";

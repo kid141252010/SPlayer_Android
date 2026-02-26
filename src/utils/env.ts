@@ -11,7 +11,8 @@ export const isMac = userAgent.includes("Macintosh");
 /** 是否为 Linux 系统 */
 export const isLinux = userAgent.includes("Linux");
 /** 是否为 Electron 环境 */
-export const isElectron = userAgent.includes("Electron") || typeof (window as any)?.electron !== "undefined";
+export const isElectron =
+  userAgent.includes("Electron") || typeof (window as any)?.electron !== "undefined";
 
 /** 是否为 Tauri 环境 */
 export const isTauri = !!((window as any)?.__TAURI_INTERNALS__ || (window as any)?.__TAURI__);
@@ -23,4 +24,3 @@ export const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Oper
 
 /** 是否为 DEV 构建 */
 export const isDevBuild = import.meta.env.VITE_BUILD_TYPE === "dev";
-

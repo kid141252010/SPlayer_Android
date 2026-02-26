@@ -306,7 +306,7 @@ const changeLocalPath =
         settingStore[settingsKey].splice(delIndex, 1);
         return;
       }
-      
+
       let dirsToAdd: string[] = [];
 
       if (isElectron) {
@@ -316,19 +316,19 @@ const changeLocalPath =
         // 转换为数组（兼容单选返回字符串的情况）
         dirsToAdd = Array.isArray(selectedDirs) ? selectedDirs : [selectedDirs];
       } else if (isTauri) {
-        const isAndroid = navigator.userAgent.toLowerCase().includes('android');
-        
+        const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+
         if (isAndroid) {
           // 🤖 安卓专属物理外挂：绕过崩溃的系统选择器，直接输入路径！
-          const defaultPath = title.includes("歌词") 
-            ? "/storage/emulated/0/Music/Lyrics" 
+          const defaultPath = title.includes("歌词")
+            ? "/storage/emulated/0/Music/Lyrics"
             : "/storage/emulated/0/Music";
-            
+
           const userInput = window.prompt(
             "【安卓权限已破解】\n系统选择器存在兼容问题，请直接确认或修改下方的物理路径：\n(注：请确保手机存储中有此文件夹)",
-            defaultPath
+            defaultPath,
           );
-          
+
           if (!userInput || !userInput.trim()) return;
           dirsToAdd = [userInput.trim()];
         } else {
@@ -353,7 +353,7 @@ const changeLocalPath =
       for (const selectedDir of dirsToAdd) {
         // 检查时需要包含原有路径和本次已添加的路径
         const pathsToCheck = [...settingStore[settingsKey], ...newlyAddedPaths];
-        
+
         let isExactMatch = false;
         let isSubfolder = false;
 
@@ -378,7 +378,9 @@ const changeLocalPath =
 
           isExactMatch = normalizedPaths.includes(normalizedSelected);
           if (includeSubFolders && !isExactMatch) {
-            isSubfolder = normalizedPaths.some((p: string) => normalizedSelected.startsWith(p + "/"));
+            isSubfolder = normalizedPaths.some((p: string) =>
+              normalizedSelected.startsWith(p + "/"),
+            );
           }
         }
 

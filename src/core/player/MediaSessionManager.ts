@@ -1,9 +1,10 @@
 import { useMusicStore, useSettingStore, useStatusStore } from "@/stores";
-import { isElectron } from "@/utils/env";
+import { isElectron, isTauri } from "@/utils/env";
 import { getPlaySongData } from "@/utils/format";
 import { msToS } from "@/utils/time";
 import type { SystemMediaEvent } from "@emi";
 import axios from "axios";
+import { invoke } from "@tauri-apps/api/core";
 import { throttle } from "lodash-es";
 import { usePlayerController } from "./PlayerController";
 import {
@@ -25,7 +26,7 @@ class MediaSessionManager {
   private metadataAbortController: AbortController | null = null;
   private currentRate: number = 1;
 
-  // Workaround for Tauri Android: playing a silent audio element to trick the 
+  // Workaround for Tauri Android: playing a silent audio element to trick the
   // system into activating the MediaSession for `navigator.mediaSession`
   private silentAudio: HTMLAudioElement | null = null;
 
@@ -37,7 +38,7 @@ class MediaSessionManager {
    * 是否使用原生媒体集成
    */
   private shouldUseNativeMedia(): boolean {
-    return isElectron;
+    return isElectron || isTauri;
   }
 
   /**
@@ -168,7 +169,8 @@ class MediaSessionManager {
       const audio = new Audio();
       audio.loop = true;
       // Very short pure silence base64 wav
-      audio.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+      audio.src =
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
       this.silentAudio = audio;
     }
   }
@@ -197,46 +199,59 @@ class MediaSessionManager {
 
     // 原生插件
     if (this.shouldUseNativeMedia() && settingStore.smtcOpen) {
-      try {
-        // 获取封面数据
-        if (
-          !coverBuffer &&
-          metadata.coverUrl &&
-          (metadata.coverUrl.startsWith("http") || metadata.coverUrl.startsWith("blob:"))
-        ) {
-          try {
-            if (metadata.coverUrl.startsWith("blob:")) {
-              const resp = await fetch(metadata.coverUrl, { signal });
-              const buf = await resp.arrayBuffer();
-              coverBuffer = new Uint8Array(buf);
-            } else {
-              const resp = await axios.get(metadata.coverUrl, {
-                responseType: "arraybuffer",
-                signal,
-              });
-              coverBuffer = new Uint8Array(resp.data);
+      if (isElectron) {
+        try {
+          // 获取封面数据
+          if (
+            !coverBuffer &&
+            metadata.coverUrl &&
+            (metadata.coverUrl.startsWith("http") || metadata.coverUrl.startsWith("blob:"))
+          ) {
+            try {
+              if (metadata.coverUrl.startsWith("blob:")) {
+                const resp = await fetch(metadata.coverUrl, { signal });
+                const buf = await resp.arrayBuffer();
+                coverBuffer = new Uint8Array(buf);
+              } else {
+                const resp = await axios.get(metadata.coverUrl, {
+                  responseType: "arraybuffer",
+                  signal,
+                });
+                coverBuffer = new Uint8Array(resp.data);
+              }
+            } catch {
+              // 忽略下载失败
             }
-          } catch {
-            // 忽略下载失败
+          }
+
+          sendMediaMetadata({
+            songName: metadata.title,
+            authorName: metadata.artist,
+            albumName: metadata.album,
+            originalCoverUrl: metadata.coverUrl,
+            coverData: coverBuffer as Buffer,
+            duration: song.duration,
+            ncmId: typeof song.id === "number" ? song.id : undefined,
+          });
+        } catch (e) {
+          if (!axios.isCancel(e)) {
+            console.error("[Media] 更新元数据失败", e);
+          }
+        } finally {
+          if (this.metadataAbortController?.signal === signal) {
+            this.metadataAbortController = null;
           }
         }
-
-        sendMediaMetadata({
-          songName: metadata.title,
-          authorName: metadata.artist,
-          albumName: metadata.album,
-          originalCoverUrl: metadata.coverUrl,
-          coverData: coverBuffer as Buffer,
-          duration: song.duration,
-          ncmId: typeof song.id === "number" ? song.id : undefined,
-        });
-      } catch (e) {
-        if (!axios.isCancel(e)) {
-          console.error("[Media] 更新元数据失败", e);
-        }
-      } finally {
-        if (this.metadataAbortController?.signal === signal) {
-          this.metadataAbortController = null;
+      } else if (isTauri) {
+        // Android: 通过 Tauri 调用原生插件
+        try {
+          await invoke("plugin:NativeMediaPlugin|updateMetadata", {
+            title: metadata.title,
+            artist: metadata.artist,
+            album: metadata.album,
+          });
+        } catch (e) {
+          console.error("[Media] Tauri Android 更新元数据失败", e);
         }
       }
       return;
@@ -344,9 +359,21 @@ class MediaSessionManager {
    * 更新播放状态
    */
   public updatePlaybackStatus(isPlaying: boolean) {
+    const musicStore = useMusicStore();
+    const statusStore = useStatusStore();
+    const song = musicStore.playSong;
+
     // 发送到原生插件
     if (this.shouldUseNativeMedia()) {
-      sendMediaPlayState(isPlaying ? "Playing" : "Paused");
+      if (isElectron) {
+        sendMediaPlayState(isPlaying ? "Playing" : "Paused");
+      } else if (isTauri && song) {
+        invoke("plugin:NativeMediaPlugin|updatePlaybackState", {
+          isPlaying,
+          position: Math.floor(statusStore.currentTime * 1000), // ms
+          duration: Math.floor(song.duration), // ms
+        }).catch((e) => console.error("[Media] Tauri Android 更新播放状态失败", e));
+      }
     }
 
     // Web API 同步 (关键：Android 状态栏同步)

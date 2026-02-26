@@ -1,8 +1,7 @@
 <template>
   <div class="full-player-mobile" ref="mobileStart">
     <!-- 顶部信息栏：作为下拉关闭手势的触发区域 -->
-    <div class="top-bar" ref="topBarRef">
-    </div>
+    <div class="top-bar" ref="topBarRef"></div>
 
     <!-- 主内容 -->
     <div
@@ -218,13 +217,23 @@ const isTouchInTopArea = (touch: Touch): boolean => {
   const lyricHeader = lyricHeaderRef.value;
   if (topBar) {
     const r = topBar.getBoundingClientRect();
-    if (touch.clientX >= r.left && touch.clientX <= r.right &&
-        touch.clientY >= r.top && touch.clientY <= r.bottom) return true;
+    if (
+      touch.clientX >= r.left &&
+      touch.clientX <= r.right &&
+      touch.clientY >= r.top &&
+      touch.clientY <= r.bottom
+    )
+      return true;
   }
   if (lyricHeader) {
     const r = lyricHeader.getBoundingClientRect();
-    if (touch.clientX >= r.left && touch.clientX <= r.right &&
-        touch.clientY >= r.top && touch.clientY <= r.bottom) return true;
+    if (
+      touch.clientX >= r.left &&
+      touch.clientX <= r.right &&
+      touch.clientY >= r.top &&
+      touch.clientY <= r.bottom
+    )
+      return true;
   }
   return false;
 };

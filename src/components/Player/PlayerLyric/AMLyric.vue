@@ -105,7 +105,7 @@ const handleInteractionEnd = () => {
 const amLyricsData = computed(() => {
   const { songLyric } = musicStore;
   if (!songLyric) return [];
-  
+
   const useYrc = songLyric.yrcData?.length && settingStore.showYrc;
   const rawLyrics = useYrc ? songLyric.yrcData : songLyric.lrcData;
   if (!Array.isArray(rawLyrics) || rawLyrics.length === 0) return [];
@@ -116,11 +116,11 @@ const amLyricsData = computed(() => {
   return rawLyrics.map((line) => {
     // 浅层拷贝行，深层拷贝 words（如果存在且需要修改）
     const processedLine = { ...line };
-    
+
     // 处理显隐和位置调换
     if (!showTran) processedLine.translatedLyric = "";
     if (!showRoma) processedLine.romanLyric = "";
-    
+
     if (swapTranRoma) {
       const temp = processedLine.translatedLyric;
       processedLine.translatedLyric = processedLine.romanLyric;
@@ -170,7 +170,7 @@ const processLyricLanguage = (player = lyricPlayerRef.value) => {
     // 批量处理，减少单次任务耗时
     for (let e of lyricLineObjects) {
       if (!e.element?.firstChild || processedElements.has(e.element)) continue;
-      
+
       const content = e.lyricLine.words.map((word: any) => word.word).join("");
       if (!content) continue;
 
@@ -184,10 +184,13 @@ const processLyricLanguage = (player = lyricPlayerRef.value) => {
 };
 
 // 切换歌曲时处理歌词语言
-watch(() => musicStore.playSong?.id, () => {
-  // 歌曲切换时清空已处理标记
-  processedElements.delete(lyricPlayerRef.value?.lyricPlayer?.currentLyricLineObjects); // WeakSet doesn't support clear, but we can rely on GC or just reset
-});
+watch(
+  () => musicStore.playSong?.id,
+  () => {
+    // 歌曲切换时清空已处理标记
+    processedElements.delete(lyricPlayerRef.value?.lyricPlayer?.currentLyricLineObjects); // WeakSet doesn't support clear, but we can rely on GC or just reset
+  },
+);
 
 watch(amLyricsData, (data) => {
   if (data?.length) nextTick(() => processLyricLanguage());
@@ -223,7 +226,7 @@ watch(lyricPlayerRef, (player) => {
       margin-left: 0;
       .amll-lyric-player {
         > div {
-          padding-left:10px;
+          padding-left: 10px;
           padding-right: 10px;
         }
       }

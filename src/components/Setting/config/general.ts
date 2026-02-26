@@ -373,34 +373,42 @@ export const useGeneralSettings = (): SettingConfig => {
             type: "custom",
             description: "设置本地歌词检索文件夹，选定文件夹内的歌词将拥有最高优先级",
             component: () =>
-              h(NFlex, { vertical: true, size: "small" }, {
-                default: () => [
-                  h(NFlex, { size: [8, 8] }, {
-                    default: () =>
-                      settingStore.localLyricPath.map((path, index) =>
-                        h(
-                          NTag,
-                          {
-                            key: path,
-                            closable: true,
-                            onClose: () => removeLyricPath(index),
-                            size: "small",
-                          },
-                          { default: () => path },
-                        ),
-                      ),
-                  }),
-                  h(
-                    NButton,
-                    {
-                      size: "small",
-                      secondary: true,
-                      onClick: () => changeLocalLyricPath(),
-                    },
-                    { default: () => "添加文件夹" },
-                  ),
-                ],
-              }),
+              h(
+                NFlex,
+                { vertical: true, size: "small" },
+                {
+                  default: () => [
+                    h(
+                      NFlex,
+                      { size: [8, 8] },
+                      {
+                        default: () =>
+                          settingStore.localLyricPath.map((path, index) =>
+                            h(
+                              NTag,
+                              {
+                                key: path,
+                                closable: true,
+                                onClose: () => removeLyricPath(index),
+                                size: "small",
+                              },
+                              { default: () => path },
+                            ),
+                          ),
+                      },
+                    ),
+                    h(
+                      NButton,
+                      {
+                        size: "small",
+                        secondary: true,
+                        onClick: () => changeLocalLyricPath(),
+                      },
+                      { default: () => "添加文件夹" },
+                    ),
+                  ],
+                },
+              ),
           },
           {
             key: "shareUrlFormat",

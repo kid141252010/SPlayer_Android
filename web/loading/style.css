@@ -126,25 +126,28 @@ footer {
 
 /* 如果 SPlayer 的顶部导航栏是固定悬浮 (fixed/absolute) 的，
    你可能需要单独给那个导航栏加 paddingTop，比如： */
-.header, .nav-bar, .top-bar {
+.header,
+.nav-bar,
+.top-bar {
   padding-top: max(env(safe-area-inset-top), 35px) !important;
 }
 /* 给状态栏留出的那条缝隙打个底色（黑或白，你可以根据 SPlayer 的主题自己换颜色） */
-body, html {
-  background-color: #121212; 
+body,
+html {
+  background-color: #121212;
 }
 
 #app {
   /* 1. 强行把整个应用的框子往下推出保底 35px 的距离（如果有安全距离就用安全距离） */
   margin-top: max(env(safe-area-inset-top, 0px), 35px) !important;
-  
+
   /* 2. 扣除掉往下推的距离，防止最底部的播放条被挤到屏幕外边去！ */
   height: calc(100vh - max(env(safe-area-inset-top, 0px), 35px)) !important;
-  
+
   /* 3. 【终极核心结界】：加上这行，所有 fixed 元素再也飞不到屏幕最顶端了，
      它们的 top: 0 现在只能从 margin-top 下面的这条线开始算起！ */
-  transform: translateY(0) !important; 
-  
+  transform: translateY(0) !important;
+
   /* 防止多余的滚动条出现 */
   overflow: hidden !important;
 }

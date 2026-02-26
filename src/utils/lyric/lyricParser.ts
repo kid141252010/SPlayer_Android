@@ -144,7 +144,10 @@ export const parseWordByWordLrc = (content: string): LyricLine[] => {
         const prevLastWord = prevLine.words[prevLine.words.length - 1];
         // 只有当当前行开始时间晚于上一行最后一个字的开始时间时，才进行截断，并预留 200ms 的动画间隙避免 AMLL 拖拽
         if (lineObj.startTime > prevLastWord.startTime) {
-          prevLastWord.endTime = Math.min(prevLastWord.endTime, Math.max(prevLastWord.startTime + 50, lineObj.startTime - 200));
+          prevLastWord.endTime = Math.min(
+            prevLastWord.endTime,
+            Math.max(prevLastWord.startTime + 50, lineObj.startTime - 200),
+          );
           prevLine.endTime = prevLastWord.endTime;
         }
       }
@@ -217,7 +220,10 @@ export const parseEnhancedLrc = (content: string): LyricLine[] => {
       if (prevLine) {
         const prevLastWord = prevLine.words[prevLine.words.length - 1];
         if (lineObj.startTime > prevLastWord.startTime) {
-          prevLastWord.endTime = Math.min(prevLastWord.endTime, Math.max(prevLastWord.startTime + 50, lineObj.startTime - 200));
+          prevLastWord.endTime = Math.min(
+            prevLastWord.endTime,
+            Math.max(prevLastWord.startTime + 50, lineObj.startTime - 200),
+          );
           prevLine.endTime = prevLastWord.endTime;
         }
       }

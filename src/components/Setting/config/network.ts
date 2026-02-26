@@ -118,7 +118,8 @@ export const useNetworkSettings = (): SettingConfig => {
             key: "customNeteaseApiUrl",
             label: "自定义网易云 API",
             type: "text-input",
-            description: "设置自定义的网易云 API 地址（包含端口），留空则使用内置或 VITE_API_BASE_URL 配置",
+            description:
+              "设置自定义的网易云 API 地址（包含端口），留空则使用内置或 VITE_API_BASE_URL 配置",
             componentProps: {
               placeholder: "https://your-api.com:3000",
             },
