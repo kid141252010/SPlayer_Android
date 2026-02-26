@@ -101,19 +101,37 @@ const handleInteractionEnd = () => {
   }, 2000);
 };
 
-// 当前歌词数据缓存，避免不必要的重新计算
-const amLyricsData = computed(() => {
+// 当前歌词数据缓存，使用 shallowRef 避免深度响应
+const amLyricsData = shallowRef<LyricLine[]>([]);
+
+// 内部维护歌词数据的缓存，用于比较是否真正变化
+let cachedLyricsData: LyricLine[] = [];
+
+// 更新歌词数据（只在真正变化时才更新）
+const updateAmLyricsData = () => {
   const { songLyric } = musicStore;
-  if (!songLyric) return [];
+  if (!songLyric) {
+    if (cachedLyricsData.length !== 0) {
+      cachedLyricsData = [];
+      amLyricsData.value = [];
+    }
+    return;
+  }
 
   const useYrc = songLyric.yrcData?.length && settingStore.showYrc;
   const rawLyrics = useYrc ? songLyric.yrcData : songLyric.lrcData;
-  if (!Array.isArray(rawLyrics) || rawLyrics.length === 0) return [];
+  if (!Array.isArray(rawLyrics) || rawLyrics.length === 0) {
+    if (cachedLyricsData.length !== 0) {
+      cachedLyricsData = [];
+      amLyricsData.value = [];
+    }
+    return;
+  }
 
   const { showTran, showRoma, showWordsRoma, swapTranRoma, lyricAlignRight } = settingStore;
 
   // 这里的处理逻辑进行了优化，仅在必要时进行深度拷贝和属性处理
-  return rawLyrics.map((line) => {
+  const processedLyrics = rawLyrics.map((line) => {
     // 浅层拷贝行，深层拷贝 words（如果存在且需要修改）
     const processedLine = { ...line };
 
@@ -141,10 +159,44 @@ const amLyricsData = computed(() => {
 
     return processedLine as LyricLine;
   });
-});
 
-// 是否有对唱行
-const hasDuet = computed(() => amLyricsData.value.some((line) => line.isDuet));
+  // 只有当数据真正变化时才更新
+  if (cachedLyricsData !== processedLyrics) {
+    cachedLyricsData = processedLyrics;
+    amLyricsData.value = processedLyrics;
+  }
+};
+
+// 使用 watch 监听需要变化的数据，避免 computed 被频繁触发
+watch(
+  () => [
+    musicStore.songLyric?.yrcData?.length,
+    musicStore.songLyric?.lrcData?.length,
+    settingStore.showYrc,
+    settingStore.showTran,
+    settingStore.showRoma,
+    settingStore.showWordsRoma,
+    settingStore.swapTranRoma,
+    settingStore.lyricAlignRight,
+  ],
+  () => {
+    updateAmLyricsData();
+  },
+  { deep: false, immediate: true },
+);
+
+// 监听歌曲切换，强制更新
+watch(
+  () => musicStore.playSong?.id,
+  () => {
+    // 清空缓存，强制更新
+    cachedLyricsData = [];
+    updateAmLyricsData();
+  },
+);
+
+// 是否有对唱行 - 使用 getter 函数访问 value
+const hasDuet = computed(() => amLyricsData.value?.some((line) => line.isDuet) ?? false);
 
 // 进度跳转
 const jumpSeek = (line: LyricLineMouseEvent) => {
@@ -192,9 +244,13 @@ watch(
   },
 );
 
-watch(amLyricsData, (data) => {
-  if (data?.length) nextTick(() => processLyricLanguage());
-});
+// 歌词数据变化时处理语言（使用 shallowRef 的监听方式）
+watch(
+  () => amLyricsData.value,
+  (data) => {
+    if (data?.length) nextTick(() => processLyricLanguage());
+  },
+);
 watch(lyricPlayerRef, (player) => {
   if (player) nextTick(() => processLyricLanguage(player));
 });

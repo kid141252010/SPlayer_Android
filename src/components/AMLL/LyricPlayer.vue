@@ -278,6 +278,113 @@ watchEffect(() => {
   else playerRef.value?.setEnableScale(true);
 });
 
+// 歌词行数据 - 使用 shallowRef 避免深度监听
+watch(
+  () => props.lyricLines,
+  (lines) => {
+    if (lines !== undefined) playerRef.value?.setLyricLines(lines);
+  },
+  { immediate: true, deep: false },
+);
+
+// 当前播放时间 - 使用 leading 节流减少更新频率
+watch(
+  () => props.currentTime,
+  (time, oldTime) => {
+    if (time === undefined) return;
+    const isSeek = oldTime !== undefined && Math.abs(time - oldTime) > 1000;
+
+    if (isSeek) {
+      // 针对 v0.2.0 版本的临时修复：手动处理跳转逻辑
+      // 因为 npm 版本的 Core 存在 seek 逻辑缺失，这里手动重置滚动状态
+      const player = playerRef.value as any;
+      if (player) {
+        player.setCurrentTime(time, true);
+
+        // 强制重置缓冲行和滚动位置
+        if (player.bufferedLines && player.hotLines && player.processedLines) {
+          player.bufferedLines.clear();
+          for (const v of player.hotLines) {
+            player.bufferedLines.add(v);
+          }
+
+          if (player.bufferedLines.size > 0) {
+            player.scrollToIndex = Math.min(...player.bufferedLines);
+          } else {
+            const foundIndex = player.processedLines.findIndex(
+              (line: any) => line.startTime >= time,
+            );
+            player.scrollToIndex = foundIndex === -1 ? player.processedLines.length : foundIndex;
+          }
+
+          player.resetScroll?.();
+          player.calcLayout?.();
+        }
+      }
+    } else {
+      playerRef.value?.setCurrentTime(time, false);
+    }
+  },
+  { immediate: true },
+);
+
+// 渐变宽度
+watchEffect(() => {
+  if (props.wordFadeWidth !== undefined) playerRef.value?.setWordFadeWidth(props.wordFadeWidth);
+});
+
+// X 轴弹簧参数
+watchEffect(() => {
+  if (props.linePosXSpringParams !== undefined)
+    playerRef.value?.setLinePosXSpringParams(props.linePosXSpringParams);
+});
+
+// Y 轴弹簧参数
+watchEffect(() => {
+  if (props.linePosYSpringParams !== undefined)
+    playerRef.value?.setLinePosYSpringParams(props.linePosYSpringParams);
+});
+
+// 缩放弹簧参数
+watchEffect(() => {
+  if (props.lineScaleSpringParams !== undefined)
+    playerRef.value?.setLineScaleSpringParams(props.lineScaleSpringParams);
+});
+
+// 对齐锚点
+watchEffect(() => {
+  if (props.alignAnchor !== undefined) playerRef.value?.setAlignAnchor(props.alignAnchor);
+});
+
+// 隐藏已播放歌词行
+watchEffect(() => {
+  if (props.hidePassedLines !== undefined)
+    playerRef.value?.setHidePassedLines(props.hidePassedLines);
+});
+
+// 对齐位置
+watchEffect(() => {
+  if (props.alignPosition !== undefined) playerRef.value?.setAlignPosition(props.alignPosition);
+});
+
+// 弹簧动画
+watchEffect(() => {
+  if (props.enableSpring !== undefined) playerRef.value?.setEnableSpring(props.enableSpring);
+  else playerRef.value?.setEnableSpring(true);
+});
+
+// 模糊效果
+watchEffect(() => {
+  if (props.enableBlur !== undefined) playerRef.value?.setEnableBlur(props.enableBlur);
+  else playerRef.value?.setEnableBlur(true);
+});
+
+// 缩放效果
+watchEffect(() => {
+  if (props.enableScale !== undefined) playerRef.value?.setEnableScale(props.enableScale);
+  else playerRef.value?.setEnableScale(true);
+});
+
 // 歌词行数据
 watchEffect(() => {
   if (props.lyricLines !== undefined) playerRef.value?.setLyricLines(props.lyricLines);
