@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex, Condvar, atomic::{AtomicBool, Ordering}};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::thread;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::time::Duration;
 
 use oboe::{
@@ -15,7 +15,7 @@ use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::{MediaSource, MediaSourceStream};
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use tauri::{State, Emitter, AppHandle, Manager};
+use tauri::{State, Emitter};
 
 #[derive(Clone, serde::Serialize)]
 struct MetadataPayload {
