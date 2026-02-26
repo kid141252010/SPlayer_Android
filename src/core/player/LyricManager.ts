@@ -445,9 +445,24 @@ class LyricManager {
 
     try {
       const settingStore = useSettingStore();
-      if (!isElectron) return defaultResult;
-      const { lyric, format }: { lyric?: string; format?: "lrc" | "ttml" | "yrc" } =
-        await window.electron.ipcRenderer.invoke("get-music-lyric", song.path);
+      // 解析本地歌词
+      let lyric = "";
+      let format: "lrc" | "ttml" | "yrc" | undefined = undefined;
+
+      if (isElectron) {
+        const result = await window.electron.ipcRenderer.invoke("get-music-lyric", song.path);
+        lyric = result.lyric;
+        format = result.format;
+      } else if (isTauri) {
+        // Android: 移除 file:// 前缀
+        const cleanPath = song.path.startsWith("file://") ? song.path.substring(7) : song.path;
+        const result = await invoke<string>("read_lyric_file_android", { uri: cleanPath });
+        lyric = result;
+        // 尝试推断格式
+        const ext = cleanPath.split('.').pop()?.toLowerCase();
+        format = ext === "ttml" ? "ttml" : ext === "yrc" ? "yrc" : "lrc";
+      }
+
       if (!lyric) return defaultResult;
       // YRC 直接解析
       if (format === "yrc") {
@@ -603,12 +618,40 @@ class LyricManager {
     // 从本地遍历
     try {
       const lyricDirs = Array.isArray(localLyricPath) ? localLyricPath.map((p) => String(p)) : [];
-      // 读取本地歌词
-      const { lrc, ttml } = await window.electron.ipcRenderer.invoke(
-        "read-local-lyric",
-        lyricDirs,
-        id,
-      );
+      let lrc = "";
+      let ttml = "";
+
+      if (isElectron) {
+        const result = await window.electron.ipcRenderer.invoke(
+          "read-local-lyric",
+          lyricDirs,
+          id,
+        );
+        lrc = result.lrc;
+        ttml = result.ttml;
+      } else if (isTauri) {
+        // Android: 递归扫描 URI 指定的目录 (通常是 DocumentTree URI)
+        // 注意：目前 read_lyric_dir_android 返回的是 Vec<LyricFile>
+        // 我们需要找到匹配歌曲 ID 的歌词文件并读取
+        for (const dirUri of lyricDirs) {
+          try {
+            const files = await invoke<LyricFile[]>("read_lyric_dir_android", { uri: dirUri });
+            // 查找匹配 id.lrc 或 id.ttml 的文件
+            const lrcFile = files.find(f => f.name === `${id}.lrc`);
+            const ttmlFile = files.find(f => f.name === `${id}.ttml`);
+
+            if (lrcFile) {
+              lrc = await invoke<string>("read_lyric_file_android", { uri: lrcFile.path });
+            }
+            if (ttmlFile) {
+              ttml = await invoke<string>("read_lyric_file_android", { uri: ttmlFile.path });
+            }
+            if (lrc || ttml) break;
+          } catch (e) {
+            console.warn(`[LyricManager] Failed to scan dir ${dirUri}:`, e);
+          }
+        }
+      }
 
       // 安全解析 LRC
       let lrcLines: LyricLine[] = [];

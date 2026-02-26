@@ -7,7 +7,7 @@
     "frontendDist": "../out/renderer",
     "devUrl": null,
     "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "npx electron-vite build"
+    "beforeBuildCommand": "pnpm build"
   },
   "app": {
     "windows": [

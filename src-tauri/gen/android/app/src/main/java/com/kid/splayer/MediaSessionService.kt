@@ -14,6 +14,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
+import androidx.media.app.NotificationCompat.MediaStyle
 import app.tauri.plugin.JSObject
 
 class MediaSessionService : Service() {
@@ -166,7 +167,7 @@ class MediaSessionService : Service() {
             .setSmallIcon(R.drawable.ic_launcher_foreground) // 确保资源存在
             .setLargeIcon(albumArt)
             // 媒体样式
-            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+            .setStyle(MediaStyle()
                 .setMediaSession(mediaSession?.sessionToken)
                 .setShowActionsInCompactView(0, 1, 2)
             )

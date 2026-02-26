@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex, Condvar, atomic::{AtomicBool, Ordering}};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::thread;
-use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom};
 use std::time::Duration;
 
 use oboe::{
@@ -913,15 +913,3 @@ pub fn get_metadata(state: State<AudioState>) -> Result<Option<AudioMetadata>, S
     Ok(st.metadata.clone())
 }
 
-#[tauri::command]
-pub fn update_native_metadata(
-    _app_handle: AppHandle,
-    _title: String,
-    _artist: String,
-    _album: String,
-    _cover_url: String,
-) -> Result<(), String> {
-    // Note: Native metadata updates are currently handled via JS IPC to NativeMediaPlugin.kt
-    // This Rust command is a placeholder for future direct JNI integration if needed.
-    Ok(())
-}
