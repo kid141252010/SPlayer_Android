@@ -39,3 +39,4 @@ panic = "abort"
 strip = true
 
 [workspace]
+members = ["plugins/native-media"]

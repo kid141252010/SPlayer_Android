@@ -1,4 +1,4 @@
-package com.kid.splayer
+package com.kid.splayer.nativemedia
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -91,7 +91,7 @@ class MediaSessionService : MediaSessionService() {
     companion object {
         const val ACTION_UPDATE_METADATA = "com.kid.splayer.UPDATE_METADATA"
         const val ACTION_UPDATE_STATE = "com.kid.splayer.UPDATE_STATE"
-        
+
         const val EXTRA_TITLE = "title"
         const val EXTRA_ARTIST = "artist"
         const val EXTRA_ALBUM = "album"
@@ -101,7 +101,6 @@ class MediaSessionService : MediaSessionService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 立即启动前台服务，防止系统在 5-10 秒后杀掉服务 (Android 12+ 限制)
         val initialNotification = createNotification("SPlayer", "Ready to play")
         startForeground(notificationId, initialNotification)
 
@@ -112,7 +111,7 @@ class MediaSessionService : MediaSessionService() {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: "Unknown"
                 val artist = intent.getStringExtra(EXTRA_ARTIST) ?: "Unknown"
                 val album = intent.getStringExtra(EXTRA_ALBUM) ?: "Unknown"
-                
+
                 updateMetadata(title, artist, album)
                 val notification = createNotification(title, artist)
                 startForeground(notificationId, notification)
@@ -122,8 +121,7 @@ class MediaSessionService : MediaSessionService() {
                 val pos = intent.getLongExtra(EXTRA_POSITION, 0)
                 val dur = intent.getLongExtra(EXTRA_DURATION, 0)
                 updatePlaybackState(isPlaying, pos)
-                
-                // 同时也更新一下通知栏按钮
+
                 val metadata = mediaSession?.controller?.metadata
                 val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "SPlayer"
                 val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: ""
@@ -134,7 +132,7 @@ class MediaSessionService : MediaSessionService() {
                 MediaButtonReceiver.handleIntent(mediaSession, intent)
             }
         }
-        
+
         return START_STICKY
     }
 
@@ -143,7 +141,6 @@ class MediaSessionService : MediaSessionService() {
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-            // .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
             .build()
         mediaSession?.setMetadata(metadata)
     }
@@ -165,43 +162,42 @@ class MediaSessionService : MediaSessionService() {
 
     private fun createNotification(title: String, artist: String, albumArt: Bitmap? = null): Notification {
         val controller = mediaSession?.controller
-        val mediaMetadata = controller?.metadata
 
         val builder = NotificationCompat.Builder(this, channelId)
-            // 显示元数据
             .setContentTitle(title)
             .setContentText(artist)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // 确保资源存在
+            .setSmallIcon(android.R.drawable.ic_media_play)
             .setLargeIcon(albumArt)
-            // 媒体样式
-            .setStyle(MediaStyle()
-                .setMediaSession(mediaSession?.sessionToken)
-                .setShowActionsInCompactView(0, 1, 2)
+            .setStyle(
+                MediaStyle()
+                    .setMediaSession(mediaSession?.sessionToken)
+                    .setShowActionsInCompactView(0, 1, 2)
             )
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            // 点击通知返回 App
             .setContentIntent(
                 PendingIntent.getActivity(
                     this, 0,
-                    Intent(this, MainActivity::class.java),
+                    packageManager.getLaunchIntentForPackage(packageName),
                     PendingIntent.FLAG_IMMUTABLE
                 )
             )
 
-        // 添加按钮: Previous, Play/Pause, Next
         builder.addAction(
             NotificationCompat.Action(
                 android.R.drawable.ic_media_previous, "Previous",
                 MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
             )
         )
-        
+
         val isPaused = mediaSession?.controller?.playbackState?.state == PlaybackStateCompat.STATE_PAUSED
         builder.addAction(
             NotificationCompat.Action(
                 if (isPaused) android.R.drawable.ic_media_play else android.R.drawable.ic_media_pause,
                 if (isPaused) "Play" else "Pause",
-                MediaButtonReceiver.buildMediaButtonPendingIntent(this, if (isPaused) PlaybackStateCompat.ACTION_PLAY else PlaybackStateCompat.ACTION_PAUSE)
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    this,
+                    if (isPaused) PlaybackStateCompat.ACTION_PLAY else PlaybackStateCompat.ACTION_PAUSE
+                )
             )
         )
 

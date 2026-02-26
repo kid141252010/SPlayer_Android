@@ -164,6 +164,11 @@ export const amllDbServers = [
     description: "社区提供的镜像源",
     value: "https://amlldb.bikonoo.com/ncm-lyrics/%s.ttml",
   },
+  {
+    label: "AMLL TTML DB 镜像站 (dimeta)",
+    description: "洛元提供的镜像源",
+    value: "https://amll.mirror.dimeta.top/api/db/ncm-lyrics/%s.ttml",
+  },
 ] as const;
 
 /**

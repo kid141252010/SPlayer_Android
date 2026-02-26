@@ -85,11 +85,19 @@ export const songLyricTTML = async (id: number) => {
         return null;
       }
       const url = server.replace("%s", String(id));
-      const response = await fetch(url);
+      console.log("[AMLL] Fetching TTML from:", url);
+      const response = await fetch(url, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+      });
+      console.log("[AMLL] Response status:", response.status);
       if (!response || response.status !== 200) {
         return null;
       }
-      return await response.text();
+      const text = await response.text();
+      console.log("[AMLL] Response length:", text.length);
+      return text;
     } catch (error) {
       console.error("Failed to fetch TTML lyric:", error);
       return null;

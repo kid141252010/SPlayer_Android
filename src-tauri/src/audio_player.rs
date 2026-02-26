@@ -1,12 +1,15 @@
-use std::sync::{Arc, Mutex, Condvar, atomic::{AtomicBool, Ordering}};
-use std::sync::mpsc::{channel, Sender, TryRecvError};
-use std::thread;
 use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::sync::mpsc::{channel, Sender, TryRecvError};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Condvar, Mutex,
+};
+use std::thread;
 use std::time::Duration;
 
 use oboe::{
-    AudioOutputCallback, AudioStreamBuilder, AudioStream,
-    DataCallbackResult, PerformanceMode, SharingMode, Stereo, Output,
+    AudioOutputCallback, AudioStream, AudioStreamBuilder, DataCallbackResult, Output,
+    PerformanceMode, SharingMode, Stereo,
 };
 use ringbuf::traits::*;
 use symphonia::core::audio::SampleBuffer;
@@ -15,7 +18,7 @@ use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::{MediaSource, MediaSourceStream};
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use tauri::{State, Emitter};
+use tauri::{Emitter, State};
 
 #[derive(Clone, serde::Serialize)]
 struct MetadataPayload {
@@ -57,13 +60,17 @@ impl Read for ProgressiveStream {
             let available = state.buffer.len() as u64;
             if self.pos < available {
                 let to_read = std::cmp::min(buf.len() as u64, available - self.pos) as usize;
-                buf[0..to_read].copy_from_slice(&state.buffer[self.pos as usize .. self.pos as usize + to_read]);
+                buf[0..to_read]
+                    .copy_from_slice(&state.buffer[self.pos as usize..self.pos as usize + to_read]);
                 self.pos += to_read as u64;
                 return Ok(to_read);
             }
 
             if state.has_error {
-                return Err(std::io::Error::new(std::io::ErrorKind::Other, "HTTP Streaming Error"));
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "HTTP Streaming Error",
+                ));
             }
 
             if state.is_eof {
@@ -88,14 +95,20 @@ impl Seek for ProgressiveStream {
                     state = cvar.wait(state).unwrap();
                 }
                 if state.has_error {
-                    return Err(std::io::Error::new(std::io::ErrorKind::Other, "Download error before finding EOF"));
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        "Download error before finding EOF",
+                    ));
                 }
                 state.buffer.len() as i64 + p
             }
         };
 
         if new_pos < 0 {
-            return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Seek to negative offset"));
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "Seek to negative offset",
+            ));
         }
 
         self.pos = new_pos as u64;
@@ -104,8 +117,12 @@ impl Seek for ProgressiveStream {
 }
 
 impl MediaSource for ProgressiveStream {
-    fn is_seekable(&self) -> bool { true }
-    fn byte_len(&self) -> Option<u64> { self.content_length }
+    fn is_seekable(&self) -> bool {
+        true
+    }
+    fn byte_len(&self) -> Option<u64> {
+        self.content_length
+    }
 }
 
 // ============================================================
@@ -209,13 +226,15 @@ impl AudioOutputCallback for PlayerCallback {
                 frame.1 = 0.0;
             }
 
-            self.stream_ctx.flush_requested.store(false, Ordering::Release);
+            self.stream_ctx
+                .flush_requested
+                .store(false, Ordering::Release);
             return DataCallbackResult::Continue;
         }
 
         let mut samples_read: u64 = 0;
         let mut cons = self.consumer.lock().unwrap();
-        
+
         for frame in frames.iter_mut() {
             // Each frame = 2 f32 samples (L, R)
             let l = cons.try_pop().unwrap_or(0.0);
@@ -321,7 +340,7 @@ impl AudioState {
                     let rb = ringbuf::HeapRb::<f32>::new(192000 * 4);
                     let (producer, consumer) = rb.split();
                     let arc_consumer = Arc::new(Mutex::new(consumer));
-                    
+
                     let stream_ctx = Arc::new(StreamContext {
                         flush_requested: AtomicBool::new(false),
                     });
@@ -338,19 +357,31 @@ impl AudioState {
                     }
 
                     // ---- Start decode thread ----
-                let decode_stop_clone = decode_stop.clone();
-                let status_for_decode = status.clone();
-                let playing_for_decode = playing.clone();
-                let volume_for_decode = volume.clone();
-                let stream_ctx_for_decode = stream_ctx.clone();
-                let app_handle_clone = app_handle.clone();
-                let preloaded_for_decode = preloaded.clone();
+                    let decode_stop_clone = decode_stop.clone();
+                    let status_for_decode = status.clone();
+                    let playing_for_decode = playing.clone();
+                    let volume_for_decode = volume.clone();
+                    let stream_ctx_for_decode = stream_ctx.clone();
+                    let app_handle_clone = app_handle.clone();
+                    let preloaded_for_decode = preloaded.clone();
 
-                _decode_handle = Some(thread::spawn(move || {
-                    Self::decode_thread(url, start_paused, producer, arc_consumer, decode_stop_clone, status_for_decode, playing_for_decode, volume_for_decode, stream_ctx_for_decode, app_handle_clone, preloaded_for_decode);
-                }));
+                    _decode_handle = Some(thread::spawn(move || {
+                        Self::decode_thread(
+                            url,
+                            start_paused,
+                            producer,
+                            arc_consumer,
+                            decode_stop_clone,
+                            status_for_decode,
+                            playing_for_decode,
+                            volume_for_decode,
+                            stream_ctx_for_decode,
+                            app_handle_clone,
+                            preloaded_for_decode,
+                        );
+                    }));
 
-                // Note: Oboe stream initialization is now executed inside the decode thread
+                    // Note: Oboe stream initialization is now executed inside the decode thread
                     // so we can properly utilize the target sample rate dynamically instead of hard-coding 44.1kHz!
 
                     // Collect any queued commands that arrived during setup
@@ -468,9 +499,11 @@ impl AudioState {
         let mut format_reader = probed.format;
 
         // ---- Find the first audio track ----
-        let track = match format_reader.tracks().iter().find(|t| {
-            t.codec_params.codec != symphonia::core::codecs::CODEC_TYPE_NULL
-        }) {
+        let track = match format_reader
+            .tracks()
+            .iter()
+            .find(|t| t.codec_params.codec != symphonia::core::codecs::CODEC_TYPE_NULL)
+        {
             Some(t) => t.clone(),
             None => {
                 eprintln!("[Decode] No audio track found");
@@ -527,10 +560,9 @@ impl AudioState {
         }
 
         // ---- Create decoder ----
-        let mut decoder = match symphonia::default::get_codecs().make(
-            &track.codec_params,
-            &DecoderOptions::default(),
-        ) {
+        let mut decoder = match symphonia::default::get_codecs()
+            .make(&track.codec_params, &DecoderOptions::default())
+        {
             Ok(d) => d,
             Err(e) => {
                 eprintln!("[Decode] Failed to create decoder: {}", e);
@@ -560,7 +592,7 @@ impl AudioState {
                 if let Err(e) = s.start() {
                     eprintln!("[AudioPlayer] Failed to start Oboe stream: {}", e);
                 }
-                
+
                 let mut st = status.lock().unwrap();
                 st.sample_rate = sample_rate_file;
 
@@ -579,7 +611,7 @@ impl AudioState {
                 st.is_playing = true;
             }
         }
-        
+
         if let Ok(mut st) = status.lock() {
             st.is_transitioning = false; // song is now loaded, safe for ENDED detection
         }
@@ -614,7 +646,7 @@ impl AudioState {
             };
             if let Some(seek_time) = seek_target {
                 stream_ctx.flush_requested.store(true, Ordering::Release);
-                
+
                 let seek_ts = (seek_time as f64 * sample_rate_file as f64) as u64;
                 match format_reader.seek(
                     symphonia::core::formats::SeekMode::Accurate,
@@ -698,7 +730,11 @@ impl AudioState {
                     (s, s)
                 } else {
                     let l = samples[i];
-                    let r = if i + 1 < samples.len() { samples[i + 1] } else { l };
+                    let r = if i + 1 < samples.len() {
+                        samples[i + 1]
+                    } else {
+                        l
+                    };
                     i += num_channels;
                     (l, r)
                 };
@@ -822,13 +858,19 @@ impl AudioState {
                 content_length,
             };
 
-            Some((MediaSourceStream::new(Box::new(stream), Default::default()), hint))
+            Some((
+                MediaSourceStream::new(Box::new(stream), Default::default()),
+                hint,
+            ))
         } else {
             // Local file
             match std::fs::read(url) {
                 Ok(data) => {
                     let cursor = Cursor::new(data);
-                    Some((MediaSourceStream::new(Box::new(cursor), Default::default()), hint))
+                    Some((
+                        MediaSourceStream::new(Box::new(cursor), Default::default()),
+                        hint,
+                    ))
                 }
                 Err(e) => {
                     eprintln!("[AudioPlayer] Failed to read local file: {}", e);
@@ -840,50 +882,75 @@ impl AudioState {
 }
 
 #[tauri::command]
-pub fn play_audio(state: State<AudioState>, url: String, paused: Option<bool>) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+pub fn play_audio(
+    state: State<AudioState>,
+    url: String,
+    paused: Option<bool>,
+) -> Result<(), String> {
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Play(url, paused.unwrap_or(false)))
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn preload_audio(state: State<AudioState>, url: String) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Preload(url))
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn pause_audio(state: State<AudioState>) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Pause)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn resume_audio(state: State<AudioState>) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Resume)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn stop_audio(state: State<AudioState>) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Stop)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn set_volume(state: State<AudioState>, volume: f32) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::SetVolume(volume.clamp(0.0, 1.0)))
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn seek_audio(state: State<AudioState>, time: f32) -> Result<(), String> {
-    state.command_tx.lock().unwrap()
+    state
+        .command_tx
+        .lock()
+        .unwrap()
         .send(AudioCommand::Seek(time))
         .map_err(|e| e.to_string())
 }
@@ -912,4 +979,3 @@ pub fn get_metadata(state: State<AudioState>) -> Result<Option<AudioMetadata>, S
     let st = state.status.lock().map_err(|e| e.to_string())?;
     Ok(st.metadata.clone())
 }
-
