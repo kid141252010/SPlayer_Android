@@ -249,6 +249,7 @@ class MediaSessionManager {
             title: metadata.title,
             artist: metadata.artist,
             album: metadata.album,
+            cover: coverBuffer ? Array.from(coverBuffer) : null,
           });
         } catch (e) {
           console.error("[Media] Tauri Android 更新元数据失败", e);
@@ -383,7 +384,7 @@ class MediaSessionManager {
       // Control silence track for Tauri Android
       if (!isElectron && this.silentAudio) {
         if (isPlaying) {
-          this.silentAudio.play().catch(() => { });
+          this.silentAudio.play().catch(() => {});
         } else {
           this.silentAudio.pause();
         }

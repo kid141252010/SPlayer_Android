@@ -15,6 +15,7 @@ class MetadataArgs {
     var title: String? = null
     var artist: String? = null
     var album: String? = null
+    var cover: List<Int>? = null
 }
 
 @InvokeArg
@@ -46,11 +47,19 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
         val artist = args.artist ?: ""
         val album = args.album ?: ""
         
+        // 将封面数据转为 ByteArray
+        val coverBytes = args.cover?.let { list ->
+            if (list.isNotEmpty()) {
+                ByteArray(list.size) { list[it].toByte() }
+            } else null
+        }
+        
         val intent = Intent(activity, MediaSessionService::class.java).apply {
             action = MediaSessionService.ACTION_UPDATE_METADATA
             putExtra(MediaSessionService.EXTRA_TITLE, title)
             putExtra(MediaSessionService.EXTRA_ARTIST, artist)
             putExtra(MediaSessionService.EXTRA_ALBUM, album)
+            coverBytes?.let { putExtra(MediaSessionService.EXTRA_COVER, it) }
         }
         activity.startService(intent)
         invoke.resolve()

@@ -95,6 +95,7 @@ class MediaSessionService : MediaSessionService() {
         const val EXTRA_TITLE = "title"
         const val EXTRA_ARTIST = "artist"
         const val EXTRA_ALBUM = "album"
+        const val EXTRA_COVER = "cover"
         const val EXTRA_IS_PLAYING = "is_playing"
         const val EXTRA_POSITION = "position"
         const val EXTRA_DURATION = "duration"
@@ -111,9 +112,17 @@ class MediaSessionService : MediaSessionService() {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: "Unknown"
                 val artist = intent.getStringExtra(EXTRA_ARTIST) ?: "Unknown"
                 val album = intent.getStringExtra(EXTRA_ALBUM) ?: "Unknown"
+                val coverBytes = intent.getByteArrayExtra(EXTRA_COVER)
+                val coverBitmap = coverBytes?.let { bytes ->
+                    try {
+                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
 
-                updateMetadata(title, artist, album)
-                val notification = createNotification(title, artist)
+                updateMetadata(title, artist, album, coverBitmap)
+                val notification = createNotification(title, artist, coverBitmap)
                 startForeground(notificationId, notification)
             }
             ACTION_UPDATE_STATE -> {
@@ -136,12 +145,19 @@ class MediaSessionService : MediaSessionService() {
         return START_STICKY
     }
 
-    private fun updateMetadata(title: String, artist: String, album: String) {
-        val metadata = MediaMetadataCompat.Builder()
+    private fun updateMetadata(title: String, artist: String, album: String, cover: Bitmap? = null) {
+        val metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-            .build()
+
+        // 设置封面图片
+        cover?.let {
+            metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, it)
+        }
+
+        mediaSession?.setMetadata(metadataBuilder.build())
+    }
         mediaSession?.setMetadata(metadata)
     }
 
