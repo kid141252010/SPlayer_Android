@@ -89,6 +89,22 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
         const pos = event.payload?.position || 0;
         this.seek(pos / 1000); // 毫秒转秒
       });
+
+      // 监听音频焦点事件
+      await listen("plugin:NativeMediaPlugin|audiofocus_loss", () => {
+        console.log("[NativePlayer] Audio focus lost, pausing");
+        this.pause();
+      });
+      await listen("plugin:NativeMediaPlugin|audiofocus_loss_transient", () => {
+        console.log("[NativePlayer] Audio focus transient lost, pausing");
+        this.pause();
+      });
+      await listen("plugin:NativeMediaPlugin|audiofocus_gain", () => {
+        console.log("[NativePlayer] Audio focus gained");
+      });
+      await listen("plugin:NativeMediaPlugin|audiofocus_duck", () => {
+        console.log("[NativePlayer] Audio focus ducking");
+      });
     } catch (e) {
       console.error("[NativePlayer] failed to listen to events:", e);
     }

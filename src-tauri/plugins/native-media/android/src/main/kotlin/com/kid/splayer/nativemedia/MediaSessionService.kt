@@ -5,8 +5,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
@@ -17,16 +21,21 @@ import androidx.media.session.MediaButtonReceiver
 import androidx.media.app.NotificationCompat.MediaStyle
 import app.tauri.plugin.JSObject
 
-class SPlayerMediaService : Service() {
+class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
     private var mediaSession: MediaSessionCompat? = null
     private val channelId = "splayer_playback"
     private val notificationId = 101
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        requestAudioFocus()
 
         mediaSession = MediaSessionCompat(this, "SPlayerSession").apply {
             isActive = true
@@ -226,7 +235,46 @@ class SPlayerMediaService : Service() {
         return builder.build()
     }
 
+    private fun requestAudioFocus() {
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setOnAudioFocusChangeListener(this)
+            .setWillPauseWhenDucked(false)
+            .build()
+
+        audioManager?.requestAudioFocus(audioFocusRequest!!)
+    }
+
+    private fun abandonAudioFocus() {
+        audioFocusRequest?.let {
+            audioManager?.abandonAudioFocusRequest(it)
+        }
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                NativeMediaPlugin.emitEvent("audiofocus_gain", JSObject())
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                NativeMediaPlugin.emitEvent("audiofocus_loss", JSObject())
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                NativeMediaPlugin.emitEvent("audiofocus_loss_transient", JSObject())
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                NativeMediaPlugin.emitEvent("audiofocus_duck", JSObject())
+            }
+        }
+    }
+
     override fun onDestroy() {
+        abandonAudioFocus()
         mediaSession?.isActive = false
         mediaSession?.release()
         super.onDestroy()
