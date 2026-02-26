@@ -77,15 +77,15 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
       );
 
       // 监听 Android 原生 MediaSession 事件
-      await listen("plugin:NativeMedia|play", () => this.resume());
-      await listen("plugin:NativeMedia|pause", () => this.pause());
-      await listen("plugin:NativeMedia|next", () => {
+      await listen("plugin:NativeMediaPlugin|play", () => this.resume());
+      await listen("plugin:NativeMediaPlugin|pause", () => this.pause());
+      await listen("plugin:NativeMediaPlugin|next", () => {
         this.dispatch("skip_next" as any, undefined);
       });
-      await listen("plugin:NativeMedia|previous", () => {
+      await listen("plugin:NativeMediaPlugin|previous", () => {
         this.dispatch("skip_previous" as any, undefined);
       });
-      await listen("plugin:NativeMedia|seek", (event: any) => {
+      await listen("plugin:NativeMediaPlugin|seek", (event: any) => {
         const pos = event.payload?.position || 0;
         this.seek(pos / 1000); // 毫秒转秒
       });
@@ -260,7 +260,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
 
   // (Removed _tickBusy, _timer, startTimer, stopTimer, _fetchDuration)
   private syncNativeState() {
-    invoke("plugin:NativeMedia|updatePlaybackState", {
+    invoke("plugin:NativeMediaPlugin|updatePlaybackState", {
       isPlaying: !this._paused,
       position: Math.floor(this._currentTime * 1000),
       duration: Math.floor(this._duration * 1000),
@@ -269,7 +269,7 @@ export class NativePlayer extends TypedEventTarget<AudioEventMap> implements IPl
 
   private syncNativeMetadata(meta: any) {
     if (!meta) return;
-    invoke("plugin:NativeMedia|updateMetadata", {
+    invoke("plugin:NativeMediaPlugin|updateMetadata", {
       title: meta.title || "Unknown",
       artist: meta.artist || "Unknown",
       album: meta.album || "Unknown",
