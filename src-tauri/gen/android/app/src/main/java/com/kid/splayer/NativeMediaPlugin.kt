@@ -55,11 +55,11 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
         }
         
         val intent = Intent(activity, SPlayerMediaService::class.java).apply {
-            action = MediaSessionService.ACTION_UPDATE_METADATA
-            putExtra(MediaSessionService.EXTRA_TITLE, title)
-            putExtra(MediaSessionService.EXTRA_ARTIST, artist)
-            putExtra(MediaSessionService.EXTRA_ALBUM, album)
-            coverBytes?.let { putExtra(MediaSessionService.EXTRA_COVER, it) }
+            action = SPlayerMediaService.ACTION_UPDATE_METADATA
+            putExtra(SPlayerMediaService.EXTRA_TITLE, title)
+            putExtra(SPlayerMediaService.EXTRA_ARTIST, artist)
+            putExtra(SPlayerMediaService.EXTRA_ALBUM, album)
+            coverBytes?.let { putExtra(SPlayerMediaService.EXTRA_COVER, it) }
         }
         activity.startService(intent)
         invoke.resolve()
@@ -73,10 +73,10 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
         val duration = args.duration
         
         val intent = Intent(activity, SPlayerMediaService::class.java).apply {
-            action = MediaSessionService.ACTION_UPDATE_STATE
-            putExtra(MediaSessionService.EXTRA_IS_PLAYING, isPlaying)
-            putExtra(MediaSessionService.EXTRA_POSITION, position)
-            putExtra(MediaSessionService.EXTRA_DURATION, duration)
+            action = SPlayerMediaService.ACTION_UPDATE_STATE
+            putExtra(SPlayerMediaService.EXTRA_IS_PLAYING, isPlaying)
+            putExtra(SPlayerMediaService.EXTRA_POSITION, position)
+            putExtra(SPlayerMediaService.EXTRA_DURATION, duration)
         }
         activity.startService(intent)
         invoke.resolve()
