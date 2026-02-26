@@ -580,7 +580,7 @@ export const useSettingStore = defineStore("setting", {
     wordFadeWidth: 0.5,
     lyricOffsetStep: 500,
     lyricOffset: 0,
-    enableOnlineTTMLLyric: false,
+    enableOnlineTTMLLyric: true,
     enableQQMusicLyric: false,
     lyricPriority: "auto",
     localLyricQQMusicMatch: false,
