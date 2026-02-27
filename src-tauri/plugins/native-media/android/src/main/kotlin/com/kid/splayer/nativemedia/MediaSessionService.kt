@@ -27,6 +27,7 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
     private val notificationId = 101
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
+    private var isStarted = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -86,9 +87,10 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "SPlayer Playback"
             val descriptionText = "Media controls for SPlayer"
-            val importance = NotificationManager.IMPORTANCE_LOW
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(channelId, name, importance).apply {
                 description = descriptionText
+                setShowBadge(true)
             }
             val notificationManager: NotificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -110,8 +112,11 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val initialNotification = createNotification("SPlayer", "Ready to play")
-        startForeground(notificationId, initialNotification)
+        if (!isStarted) {
+            val initialNotification = createNotification("SPlayer", "Ready to play")
+            startForeground(notificationId, initialNotification)
+            isStarted = true
+        }
 
         if (intent == null) return START_STICKY
 
@@ -131,7 +136,8 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
 
                 updateMetadata(title, artist, album, coverBitmap)
                 val notification = createNotification(title, artist, coverBitmap)
-                startForeground(notificationId, notification)
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(notificationId, notification)
             }
             ACTION_UPDATE_STATE -> {
                 val isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true)
@@ -142,8 +148,10 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
                 val metadata = mediaSession?.controller?.metadata
                 val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "SPlayer"
                 val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: ""
-                val notification = createNotification(title, artist)
-                startForeground(notificationId, notification)
+                val cover = metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
+                val notification = createNotification(title, artist, cover)
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(notificationId, notification)
             }
             else -> {
                 MediaButtonReceiver.handleIntent(mediaSession, intent)
@@ -159,14 +167,11 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
 
-        // 设置封面图片
         cover?.let {
             metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, it)
         }
 
         mediaSession?.setMetadata(metadataBuilder.build())
-    }
-        mediaSession?.setMetadata(metadata)
     }
 
     private fun updatePlaybackState(isPlaying: Boolean, position: Long) {
@@ -198,11 +203,12 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
                     .setShowActionsInCompactView(0, 1, 2)
             )
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setOngoing(true)
             .setContentIntent(
                 PendingIntent.getActivity(
                     this, 0,
                     packageManager.getLaunchIntentForPackage(packageName),
-                    PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
             )
 
