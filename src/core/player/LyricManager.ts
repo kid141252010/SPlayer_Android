@@ -1010,9 +1010,7 @@ class LyricManager {
     }
 
     try {
-      console.log("[LyricManager] 开始获取歌词, song:", song.id, song.name);
       const { data, meta } = await this.fetchLyric(song);
-      console.log("[LyricManager] 歌词获取完成, data:", data);
 
       // 再次确认请求是否仍然有效
       if (this.activeLyricReq !== req) return;
@@ -1033,7 +1031,6 @@ class LyricManager {
    * @returns 歌词结果和元数据
    */
   public async fetchLyric(song: SongType): Promise<LyricFetchResult> {
-    console.log("[LyricManager] fetchLyric 开始, isTauri:", isTauri, "song.type:", song.type);
     const settingStore = useSettingStore();
     const isStreaming = song?.type === "streaming";
     let fetchResult: LyricFetchResult = {
@@ -1044,13 +1041,8 @@ class LyricManager {
     try {
       // 0. Tauri 本地文件夹歌词 (最高优先级)
       if (isTauri) {
-        console.log(
-          "[LyricManager] 检查 Tauri 本地歌词, localLyricPath:",
-          settingStore.localLyricPath,
-        );
         const tauriLocal = await this.fetchTauriLocalLyric(song);
         if (tauriLocal) {
-          console.log("[LyricManager] 找到 Tauri 本地歌词");
           fetchResult = tauriLocal;
           // 后处理：简繁转换
           fetchResult.data = await this.applyChineseVariant(fetchResult.data);
@@ -1060,7 +1052,6 @@ class LyricManager {
 
       // 判断歌词来源
       const isLocal = Boolean(song.path) || false;
-      console.log("[LyricManager] isStreaming:", isStreaming, "isLocal:", isLocal);
       if (isStreaming) {
         fetchResult = await this.fetchStreamingLyric(song);
       } else {
@@ -1075,9 +1066,7 @@ class LyricManager {
           fetchResult = await this.fetchLocalLyric(song);
         } else {
           // 在线获取
-          console.log("[LyricManager] 开始获取在线歌词");
           fetchResult = await this.fetchOnlineLyric(song);
-          console.log("[LyricManager] 在线歌词获取完成, result:", fetchResult);
         }
       }
       // 后处理：元数据排除
