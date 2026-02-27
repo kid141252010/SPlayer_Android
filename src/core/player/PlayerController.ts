@@ -557,7 +557,6 @@ class PlayerController {
     if (this.retryInfo.songId !== sid) {
       this.retryInfo = { songId: sid || 0, count: 0 };
     }
-    statusStore.lyricLoading = true;
     // 重置 AB 循环
     statusStore.abLoop.enable = false;
     statusStore.abLoop.pointA = null;
