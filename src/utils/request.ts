@@ -57,12 +57,15 @@ server.interceptors.request.use(
       const protocol = settingStore.proxyProtocol.toLowerCase();
       const server = settingStore.proxyServe;
       const port = settingStore.proxyPort;
+      console.log("[Request] 使用代理:", `${protocol}://${server}:${port}`);
       // 正确设置代理
       (request as any).proxy = {
         host: server,
         port: parseInt(String(port), 10),
         protocol: protocol,
       };
+    } else {
+      console.log("[Request] 未使用代理");
     }
     // 发送请求
     return request;
