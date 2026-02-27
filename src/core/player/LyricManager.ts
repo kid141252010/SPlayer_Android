@@ -299,7 +299,9 @@ class LyricManager {
       // 检查开关 (如果显式选了 QM 优先, 则忽略开关限制? 不, UI上限制了)
       if (!settingStore.enableQQMusicLyric && settingStore.lyricPriority !== "qm") return;
 
+      console.log("[LyricManager] 开始获取 QQ 音乐歌词");
       const qqLyric = await this.fetchQQMusicLyric(song);
+      console.log("[LyricManager] QQ 音乐歌词结果:", qqLyric ? "有数据" : "无数据");
       if (!qqLyric) return;
 
       // 设置结果
@@ -319,8 +321,16 @@ class LyricManager {
       if (!settingStore.enableOnlineTTMLLyric && settingStore.lyricPriority !== "ttml") return;
       if (typeof id !== "number") return;
       let ttmlContent: string | null = await this.getRawLyricCache(id, "ttml");
+      console.log("[LyricManager] TTML 缓存状态:", ttmlContent ? "有缓存" : "无缓存");
       if (!ttmlContent) {
+        console.log("[LyricManager] 请求 TTML API, id:", id);
         ttmlContent = await songLyricTTML(id);
+        console.log(
+          "[LyricManager] TTML API 返回:",
+          ttmlContent ? "有数据" : "无数据",
+          "长度:",
+          ttmlContent?.length,
+        );
         if (ttmlContent && typeof ttmlContent === "string") {
           this.saveRawLyricCache(id, "ttml", ttmlContent);
         }
@@ -329,6 +339,7 @@ class LyricManager {
       const sorted = this.cleanTTMLTranslations(ttmlContent);
       const parsed = parseTTML(sorted);
       const lines = parsed?.lines || [];
+      console.log("[LyricManager] TTML 解析结果, 行数:", lines.length);
       if (!lines.length) return;
 
       // 只有当没有 YRC 数据或优先级为 TTML 或 自动模式(TTML > QM) 时才覆盖
@@ -353,17 +364,30 @@ class LyricManager {
       if (cached) {
         try {
           data = JSON.parse(cached);
+          console.log("[LyricManager] 使用 LRC 缓存, id:", id);
         } catch {
           data = null;
         }
       }
       if (!data) {
+        console.log("[LyricManager] 请求网易云歌词 API, id:", id);
         data = await songLyric(id);
+        console.log(
+          "[LyricManager] 网易云 API 返回:",
+          data?.code,
+          "has lrc:",
+          !!data?.lrc?.lyric,
+          "has yrc:",
+          !!data?.yrc?.lyric,
+        );
         if (data && data.code === 200) {
           this.saveRawLyricCache(id, "lrc", JSON.stringify(data));
         }
       }
-      if (!data || data.code !== 200) return;
+      if (!data || data.code !== 200) {
+        console.log("[LyricManager] LRC 获取失败, code:", data?.code);
+        return;
+      }
       let lrcLines: LyricLine[] = [];
       let yrcLines: LyricLine[] = [];
       // 普通歌词
@@ -396,8 +420,15 @@ class LyricManager {
 
     // 执行优先策略
     const priority = settingStore.lyricPriority;
+    console.log(
+      "[LyricManager] 歌词优先级:",
+      priority,
+      "enableQQMusicLyric:",
+      settingStore.enableQQMusicLyric,
+    );
     if (priority === "qm") {
       await adoptQQMusic();
+      console.log("[LyricManager] QM 歌词结果:", qqMusicAdopted);
       // 如果 QM 没结果，回退到 Default
       if (!qqMusicAdopted) {
         await Promise.all([adoptTTML(), adoptLRC()]);
@@ -405,6 +436,12 @@ class LyricManager {
     } else if (priority === "official") {
       // 仅使用官方源
       await adoptLRC();
+      console.log(
+        "[LyricManager] Official 歌词结果, lrc:",
+        result.lrcData.length,
+        "yrc:",
+        result.yrcData.length,
+      );
     } else if (priority === "ttml") {
       await adoptTTML();
       await adoptLRC();
@@ -414,8 +451,17 @@ class LyricManager {
     } else {
       if (settingStore.enableQQMusicLyric) {
         await adoptQQMusic();
+        console.log("[LyricManager] QM 歌词结果:", qqMusicAdopted);
       }
       await Promise.all([adoptTTML(), adoptLRC()]);
+      console.log(
+        "[LyricManager] TTML/LRC 结果, ttml:",
+        ttmlAdopted,
+        "lrc:",
+        result.lrcData.length,
+        "yrc:",
+        result.yrcData.length,
+      );
     }
     // 设置元数据状态
     meta.usingTTMLLyric = ttmlAdopted;
