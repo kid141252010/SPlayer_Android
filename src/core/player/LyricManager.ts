@@ -69,7 +69,6 @@ class LyricManager {
     statusStore.usingQRCLyric = false;
     // 重置歌词索引
     statusStore.lyricIndex = -1;
-    statusStore.lyricLoading = false;
   }
 
   /**
@@ -1022,6 +1021,7 @@ class LyricManager {
     } catch (error) {
       console.error("❌ 处理歌词失败:", error);
       this.resetSongLyric();
+      statusStore.lyricLoading = false;
     }
   }
 
