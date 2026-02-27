@@ -55,7 +55,7 @@ class NativeMediaPlugin(private val activity: Activity) : Plugin(activity) {
         // 将封面数据转为 ByteArray
         val coverBytes = args.cover?.let { list ->
             if (list.isNotEmpty()) {
-                ByteArray(list.size) { list[it].toByte() }
+                ByteArray(list.size) { list[it].toInt() and 0xFF }
             } else null
         }
         

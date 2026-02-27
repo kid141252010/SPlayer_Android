@@ -23,15 +23,26 @@ import androidx.media.app.NotificationCompat.MediaStyle
 import app.tauri.plugin.JSObject
 
 class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
-    companion object {
-        private const val TAG = "SPlayerMediaService"
-    }
-    
     private var mediaSession: MediaSessionCompat? = null
     private val channelId = "splayer_playback"
     private val notificationId = 101
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
+    private var isStarted = false
+
+    companion object {
+        private const val TAG = "SPlayerMediaService"
+        const val ACTION_UPDATE_METADATA = "com.kid.splayer.UPDATE_METADATA"
+        const val ACTION_UPDATE_STATE = "com.kid.splayer.UPDATE_STATE"
+        
+        const val EXTRA_TITLE = "title"
+        const val EXTRA_ARTIST = "artist"
+        const val EXTRA_ALBUM = "album"
+        const val EXTRA_COVER = "cover"
+        const val EXTRA_IS_PLAYING = "is_playing"
+        const val EXTRA_POSITION = "position"
+        const val EXTRA_DURATION = "duration"
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -93,9 +104,10 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "SPlayer Playback"
             val descriptionText = "Media controls for SPlayer"
-            val importance = NotificationManager.IMPORTANCE_LOW
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(channelId, name, importance).apply {
                 description = descriptionText
+                setShowBadge(true)
             }
             val notificationManager: NotificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -103,25 +115,12 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
         }
     }
 
-    companion object {
-        const val ACTION_UPDATE_METADATA = "com.kid.splayer.UPDATE_METADATA"
-        const val ACTION_UPDATE_STATE = "com.kid.splayer.UPDATE_STATE"
-        
-        const val EXTRA_TITLE = "title"
-        const val EXTRA_ARTIST = "artist"
-        const val EXTRA_ALBUM = "album"
-        const val EXTRA_COVER = "cover"
-        const val EXTRA_IS_PLAYING = "is_playing"
-        const val EXTRA_POSITION = "position"
-        const val EXTRA_DURATION = "duration"
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand called with action: ${intent?.action}")
-        // 立即启动前台服务，防止系统在 5-10 秒后杀掉服务 (Android 12+ 限制)
-        val initialNotification = createNotification("SPlayer", "Ready to play")
-        startForeground(notificationId, initialNotification)
-        Log.d(TAG, "Started foreground with notification")
+        if (!isStarted) {
+            val initialNotification = createNotification("SPlayer", "Ready to play")
+            startForeground(notificationId, initialNotification)
+            isStarted = true
+        }
 
         if (intent == null) return START_STICKY
 
@@ -141,7 +140,8 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
                 
                 updateMetadata(title, artist, album, coverBitmap)
                 val notification = createNotification(title, artist, coverBitmap)
-                startForeground(notificationId, notification)
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(notificationId, notification)
             }
             ACTION_UPDATE_STATE -> {
                 val isPlaying = intent.getBooleanExtra(EXTRA_IS_PLAYING, true)
@@ -149,12 +149,13 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
                 val dur = intent.getLongExtra(EXTRA_DURATION, 0)
                 updatePlaybackState(isPlaying, pos)
                 
-                // 同时也更新一下通知栏按钮
                 val metadata = mediaSession?.controller?.metadata
                 val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "SPlayer"
                 val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: ""
-                val notification = createNotification(title, artist)
-                startForeground(notificationId, notification)
+                val cover = metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
+                val notification = createNotification(title, artist, cover)
+                val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(notificationId, notification)
             }
             else -> {
                 MediaButtonReceiver.handleIntent(mediaSession, intent)
@@ -198,23 +199,21 @@ class SPlayerMediaService : Service(), AudioManager.OnAudioFocusChangeListener {
         val mediaMetadata = controller?.metadata
 
         val builder = NotificationCompat.Builder(this, channelId)
-            // 显示元数据
             .setContentTitle(title)
             .setContentText(artist)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // 确保资源存在
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setLargeIcon(albumArt)
-            // 媒体样式
             .setStyle(MediaStyle()
                 .setMediaSession(mediaSession?.sessionToken)
                 .setShowActionsInCompactView(0, 1, 2)
             )
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            // 点击通知返回 App
+            .setOngoing(true)
             .setContentIntent(
                 PendingIntent.getActivity(
                     this, 0,
                     Intent(this, MainActivity::class.java),
-                    PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
             )
 
