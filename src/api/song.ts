@@ -79,24 +79,26 @@ export const songLyricTTML = async (id: number) => {
   } else {
     try {
       const settingStore = useSettingStore();
-      const server = settingStore.amllDbServer || defaultAMLLDbServer;
+      let server = settingStore.amllDbServer || defaultAMLLDbServer;
       if (!server || !server.includes("%s")) {
         console.warn("Invalid AMLL DB server configuration");
         return null;
       }
-      const url = server.replace("%s", String(id));
-      console.log("[AMLL] Fetching TTML from:", url);
-      const response = await fetch(url, {
+      server = server.replace("%s", String(id));
+      console.log("[AMLL] Fetching TTML from:", server);
+      // 使用封装的 request 支持代理配置
+      const response = await request({
+        url: server,
         method: "GET",
-        mode: "cors",
-        credentials: "omit",
+        baseURL: "",
+        params: {},
       });
-      console.log("[AMLL] Response status:", response.status);
       if (!response || response.status !== 200) {
+        console.warn("[AMLL] Response failed:", response?.status);
         return null;
       }
-      const text = await response.text();
-      console.log("[AMLL] Response length:", text.length);
+      const text = response.data;
+      console.log("[AMLL] Response length:", text?.length);
       return text;
     } catch (error) {
       console.error("Failed to fetch TTML lyric:", error);
