@@ -57,8 +57,12 @@ server.interceptors.request.use(
       const protocol = settingStore.proxyProtocol.toLowerCase();
       const server = settingStore.proxyServe;
       const port = settingStore.proxyPort;
-      const proxy = `${protocol}://${server}:${port}`;
-      if (proxy) request.params.proxy = proxy;
+      // 正确设置代理
+      (request as any).proxy = {
+        host: server,
+        port: parseInt(String(port), 10),
+        protocol: protocol,
+      };
     }
     // 发送请求
     return request;
