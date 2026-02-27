@@ -1139,28 +1139,46 @@ class LyricManager {
   private async fetchTauriLocalLyric(song: SongType): Promise<LyricFetchResult | null> {
     const settingStore = useSettingStore();
     const { localLyricPath } = settingStore;
-    if (!isTauri || !localLyricPath.length) return null;
+    console.log("[LyricManager] fetchTauriLocalLyric 开始, localLyricPath:", localLyricPath);
+    if (!isTauri || !localLyricPath || localLyricPath.length === 0) {
+      console.log("[LyricManager] fetchTauriLocalLyric 跳过: 未配置本地歌词目录");
+      return null;
+    }
 
     let lrcContent = "";
     let ttmlContent = "";
     const targetSuffixLrc = `${song.id}.lrc`.toLowerCase();
     const targetSuffixTtml = `${song.id}.ttml`.toLowerCase();
+    console.log(
+      "[LyricManager] 查找本地歌词, id:",
+      song.id,
+      "lrc:",
+      targetSuffixLrc,
+      "ttml:",
+      targetSuffixTtml,
+    );
 
     // 🌟 关键：判断是否为安卓，不再判断 content://
     const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+    console.log("[LyricManager] isAndroid:", isAndroid);
 
     for (const dir of localLyricPath) {
+      console.log("[LyricManager] 扫描目录:", dir);
       if (lrcContent && ttmlContent) break;
 
       if (isAndroid) {
         try {
           // 只要是安卓，无脑调用 Rust 接口
+          console.log("[LyricManager] 调用 Rust read_lyric_dir_android, dir:", dir);
           const files: LyricFile[] = await invoke("read_lyric_dir_android", { uri: dir });
+          console.log("[LyricManager] Rust 返回文件数:", files?.length);
           for (const file of files) {
             const fileName = file.name.toLowerCase();
             if (!lrcContent && fileName.endsWith(targetSuffixLrc)) {
+              console.log("[LyricManager] 找到 LRC 文件:", file.name);
               lrcContent = await invoke("read_lyric_file_android", { uri: file.path });
             } else if (!ttmlContent && fileName.endsWith(targetSuffixTtml)) {
+              console.log("[LyricManager] 找到 TTML 文件:", file.name);
               ttmlContent = await invoke("read_lyric_file_android", { uri: file.path });
             }
             if (lrcContent && ttmlContent) break;
@@ -1174,7 +1192,11 @@ class LyricManager {
       }
     }
 
-    if (!lrcContent && !ttmlContent) return null;
+    console.log("[LyricManager] 本地歌词结果, lrc:", !!lrcContent, "ttml:", !!ttmlContent);
+    if (!lrcContent && !ttmlContent) {
+      console.log("[LyricManager] 未找到本地歌词，回退到在线源");
+      return null;
+    }
 
     // 安全解析 LRC
     let lrcLines: LyricLine[] = [];
